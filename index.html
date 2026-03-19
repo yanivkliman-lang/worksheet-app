@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>יוצר דפי עבודה</title>
+  <style>
+    /* ==================== GENERAL ==================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      min-height: 100vh;
+      direction: rtl;
+    }
+
+    /* ==================== APP SHELL ==================== */
+    .app-header {
+      background: linear-gradient(135deg, #2563eb, #1e40af);
+      color: white;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+    .app-header .logo { font-size: 2rem; }
+    .app-header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
+    .app-header p  { font-size: 0.85rem; opacity: 0.85; margin-top: 2px; }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 24px;
+      max-width: 1280px;
+      margin: 28px auto;
+      padding: 0 24px;
+    }
+
+    /* ==================== FORM PANEL ==================== */
+    .form-panel {
+      background: white;
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      height: fit-content;
+      position: sticky;
+      top: 24px;
+    }
+
+    .form-panel h2 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e40af;
+      margin-bottom: 22px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+    .field input, .field select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: #1a202c;
+      background: #f9fafb;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field input:focus, .field select:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+      background: white;
+    }
+
+    /* Toggle group */
+    .toggle-group {
+      display: flex;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .toggle-group input[type="radio"] { display: none; }
+    .toggle-group label {
+      flex: 1;
+      text-align: center;
+      padding: 8px 4px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #6b7280;
+      background: #f9fafb;
+      border-left: 1.5px solid #d1d5db;
+      transition: background .15s, color .15s;
+      margin: 0;
+    }
+    .toggle-group label:first-of-type { border-left: none; }
+    .toggle-group input[type="radio"]:checked + label {
+      background: #2563eb;
+      color: white;
+    }
+
+    /* Section title inside form */
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      color: #9ca3af;
+      margin: 22px 0 12px;
+    }
+
+    /* Info box */
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 10px 13px;
+      font-size: 0.78rem;
+      color: #1d4ed8;
+      line-height: 1.6;
+      margin-top: 6px;
+    }
+    .info-box b { color: #1e40af; }
+
+    /* Generate button */
+    .btn-generate {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 24px;
+      letter-spacing: .3px;
+      box-shadow: 0 4px 12px rgba(37,99,235,.3);
+      transition: transform .15s, box-shadow .15s, opacity .15s;
+    }
+    .btn-generate:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(37,99,235,.35);
+    }
+    .btn-generate:active { transform: translateY(0); }
+    .btn-generate:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    /* ==================== PREVIEW PANEL ==================== */
+    .preview-panel {
+      min-height: 300px;
+    }
+
+    .preview-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      justify-content: flex-end;
+    }
+    .btn-print, .btn-new {
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-print {
+      background: #059669;
+      color: white;
+      box-shadow: 0 2px 8px rgba(5,150,105,.25);
+    }
+    .btn-print:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(5,150,105,.3); }
+    .btn-new {
+      background: white;
+      color: #374151;
+      border: 1.5px solid #d1d5db;
+    }
+    .btn-new:hover { background: #f9fafb; transform: translateY(-1px); }
+
+    /* Empty state */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      border-radius: 14px;
+      padding: 60px 32px;
+      color: #9ca3af;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      text-align: center;
+      min-height: 400px;
+    }
+    .empty-state .icon { font-size: 4rem; margin-bottom: 16px; }
+    .empty-state h3 { font-size: 1.1rem; color: #6b7280; margin-bottom: 8px; }
+    .empty-state p  { font-size: 0.85rem; line-height: 1.6; }
+
+    /* ==================== WORKSHEET ==================== */
+    #worksheet-output {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 40px 48px;
+      font-size: 0.92rem;
+      line-height: 1.7;
+    }
+
+    .ws-header {
+      border-bottom: 3px solid #1e40af;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .ws-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #1e40af;
+      margin-bottom: 4px;
+    }
+    .ws-meta {
+      font-size: 0.82rem;
+      color: #6b7280;
+      display: flex;
+      gap: 16px;
+    }
+    .ws-meta span { display: flex; align-items: center; gap: 4px; }
+    .ws-logo {
+      font-size: 2.5rem;
+      opacity: .15;
+    }
+
+    .ws-student-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 18px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 28px;
+    }
+    .ws-student-info .info-line {
+      border-bottom: 1.5px solid #94a3b8;
+      padding-bottom: 4px;
+      font-size: 0.82rem;
+      color: #6b7280;
+    }
+
+    .ws-section {
+      margin-bottom: 32px;
+    }
+    .ws-section-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #1e40af;
+      background: #eff6ff;
+      border-right: 4px solid #2563eb;
+      padding: 8px 14px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .difficulty-badge {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+      margin-right: 8px;
+    }
+    .badge-easy   { background: #d1fae5; color: #065f46; }
+    .badge-medium { background: #fef3c7; color: #92400e; }
+    .badge-hard   { background: #fee2e2; color: #991b1b; }
+    .badge-mixed  { background: #e0e7ff; color: #3730a3; }
+
+    /* Exercise list */
+    .exercise-list { list-style: none; }
+    .exercise-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px dashed #e2e8f0;
+    }
+    .exercise-item:last-child { border-bottom: none; }
+    .ex-num {
+      min-width: 28px;
+      height: 28px;
+      background: #2563eb;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .ex-num.easy   { background: #059669; }
+    .ex-num.medium { background: #d97706; }
+    .ex-num.hard   { background: #dc2626; }
+    .ex-num.verbal { background: #7c3aed; }
+
+    .ex-content { flex: 1; }
+    .ex-text {
+      font-size: 0.9rem;
+      color: #1a202c;
+      direction: rtl;
+      text-align: left;
+    }
+    .ex-text .math {
+      direction: ltr;
+      display: inline-block;
+      unicode-bidi: bidi-override;
+    }
+    .ex-answer-line {
+      margin-top: 6px;
+      border-bottom: 1px solid #cbd5e1;
+      width: 100%;
+      height: 22px;
+    }
+    .ex-answer-lines { margin-top: 6px; }
+    .ex-answer-lines .line {
+      border-bottom: 1px solid #cbd5e1;
+      height: 22px;
+      margin-bottom: 4px;
+    }
+
+    /* Worksheet footer */
+    .ws-footer {
+      margin-top: 32px;
+      padding-top: 14px;
+      border-top: 2px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+    .ws-grade-box {
+      border: 2px solid #d1d5db;
+      border-radius: 8px;
+      padding: 6px 28px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+
+    /* ==================== LOADING ==================== */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,.75);
+      backdrop-filter: blur(3px);
+      z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    .loading-overlay.active { display: flex; }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 5px solid #e2e8f0;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 1rem; font-weight: 600; color: #1e40af; }
+
+    /* ==================== PRINT ==================== */
+    @media print {
+      body { background: white; }
+      .app-header, .form-panel, .preview-actions { display: none !important; }
+      .main-layout { display: block; margin: 0; padding: 0; }
+      .preview-panel { padding: 0; }
+      #worksheet-output {
+        box-shadow: none;
+        border-radius: 0;
+        padding: 20px 30px;
+        font-size: 11pt;
+      }
+      .ex-num { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .ws-section-title { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .difficulty-badge { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+
+    @media (max-width: 900px) {
+      .main-layout { grid-template-columns: 1fr; }
+      .form-panel { position: static; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="app-header">
+  <div class="logo">📄</div>
+  <div>
+    <h1>יוצר דפי עבודה</h1>
+    <p>צור דפי עבודה מקצועיים ומותאמים אישית לכיתה שלך</p>
+  </div>
+</header>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text">יוצר דף עבודה...</div>
+</div>
+
+<div class="main-layout">
+
+  <!-- FORM PANEL -->
+  <aside class="form-panel">
+    <h2>⚙️ הגדרות דף העבודה</h2>
+
+    <div class="field">
+      <label>נושא הדף <span style="color:#dc2626;font-size:0.8rem;">* חובה — נושא מתמטי בלבד</span></label>
+      <input type="text" id="subject" placeholder="למשל: כפל וחילוק, גיאומטריה, שברים, אלגברה..." />
+    </div>
+
+    <div class="field">
+      <label>כיתה</label>
+      <select id="grade">
+        <option value="">בחר כיתה...</option>
+        <option value="א׳">כיתה א׳</option>
+        <option value="ב׳">כיתה ב׳</option>
+        <option value="ג׳">כיתה ג׳</option>
+        <option value="ד׳">כיתה ד׳</option>
+        <option value="ה׳">כיתה ה׳</option>
+        <option value="ו׳">כיתה ו׳</option>
+        <option value="ז׳">כיתה ז׳</option>
+        <option value="ח׳">כיתה ח׳</option>
+        <option value="ט׳">כיתה ט׳</option>
+        <option value="י׳">כיתה י׳</option>
+        <option value="י״א">כיתה י״א</option>
+        <option value="י״ב">כיתה י״ב</option>
+      </select>
+    </div>
+
+    <div class="section-title">דרגת קושי</div>
+    <div class="field">
+      <div class="toggle-group" id="difficulty-group">
+        <input type="radio" name="difficulty" id="d-easy"   value="easy"   checked />
+        <label for="d-easy">קל</label>
+        <input type="radio" name="difficulty" id="d-medium" value="medium" />
+        <label for="d-medium">בינוני</label>
+        <input type="radio" name="difficulty" id="d-hard"   value="hard"   />
+        <label for="d-hard">קשה</label>
+        <input type="radio" name="difficulty" id="d-mixed"  value="mixed"  />
+        <label for="d-mixed">מעורב</label>
+      </div>
+      <div class="info-box" id="difficulty-info" style="margin-top:8px;">
+        20 תרגילים — <b>קל</b>
+      </div>
+    </div>
+
+    <div class="section-title">סוג התוכן</div>
+    <div class="field">
+      <div class="toggle-group" id="type-group">
+        <input type="radio" name="content-type" id="ct-exercises" value="exercises" checked />
+        <label for="ct-exercises">תרגילים</label>
+        <input type="radio" name="content-type" id="ct-verbal"    value="verbal"    />
+        <label for="ct-verbal">שאלות מילוליות</label>
+        <input type="radio" name="content-type" id="ct-mix"       value="mix"       />
+        <label for="ct-mix">מיקס</label>
+      </div>
+      <div class="info-box" id="type-info" style="margin-top:8px;">
+        <b>20 תרגילים</b> בלבד
+      </div>
+    </div>
+
+    <button class="btn-generate" id="btn-generate" onclick="generateWorksheet()">
+      ✨ צור דף עבודה
+    </button>
+  </aside>
+
+  <!-- PREVIEW PANEL -->
+  <main class="preview-panel">
+    <div id="empty-state" class="empty-state">
+      <div class="icon">📝</div>
+      <h3>הדף שלך יופיע כאן</h3>
+      <p>מלא את הפרטים בצד שמאל<br/>ולחץ על "צור דף עבודה"</p>
+    </div>
+
+    <div id="preview-wrapper" style="display:none;">
+      <div class="preview-actions">
+        <button class="btn-new" onclick="resetForm()">🔄 דף חדש</button>
+        <button class="btn-print" onclick="window.print()">🖨️ הדפס</button>
+      </div>
+      <div id="worksheet-output"></div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+/* ============================================================
+   CONSTANTS & UI HELPERS
+   ============================================================ */
+const difficultyLabels = { easy:'קל', medium:'בינוני', hard:'קשה', mixed:'מעורב' };
+
+document.querySelectorAll('input[name="difficulty"]').forEach(r => r.addEventListener('change', updateInfoBoxes));
+document.querySelectorAll('input[name="content-type"]').forEach(r => r.addEventListener('change', updateInfoBoxes));
+
+function updateInfoBoxes() {
+  const diff  = document.querySelector('input[name="difficulty"]:checked').value;
+  const ctype = document.querySelector('input[name="content-type"]:checked').value;
+  const diffTexts = {
+    easy:  '20 תרגילים — <b>קל</b>', medium: '20 תרגילים — <b>בינוני</b>',
+    hard:  '20 תרגילים — <b>קשה</b>', mixed: '<b>6 קלים</b> + <b>10 בינוניים</b> + <b>4 קשים</b>'
+  };
+  document.getElementById('difficulty-info').innerHTML = diffTexts[diff];
+  document.getElementById('type-info').innerHTML =
+    ctype === 'exercises' ? '<b>20 תרגילים</b> בלבד' :
+    ctype === 'verbal'    ? '<b>10 שאלות מילוליות</b> בלבד' :
+                            '<b>12 תרגילים</b> + <b>8 שאלות מילוליות</b>';
+}
+
+/* ============================================================
+   GRADE UTILITIES
+   ============================================================ */
+function gradeToNum(grade) {
+  const map = {'א׳':1,'ב׳':2,'ג׳':3,'ד׳':4,'ה׳':5,'ו׳':6,'ז׳':7,'ח׳':8,'ט׳':9,'י׳':10,'י״א':11,'י״ב':12};
+  return map[grade] || 7;
+}
+
+// Returns a band string based on grade number
+function getBand(g) {
+  if (g <= 2)  return 'elem_low';   // כיתות א-ב
+  if (g <= 4)  return 'elem_mid';   // כיתות ג-ד
+  if (g <= 6)  return 'elem_high';  // כיתות ה-ו
+  if (g <= 8)  return 'middle';     // כיתות ז-ח
+  if (g <= 10) return 'high_low';   // כיתות ט-י
+  return 'high_high';               // כיתות יא-יב
+}
+
+/* ============================================================
+   MATH HELPERS
+   ============================================================ */
+function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr)      { return arr[rnd(0, arr.length - 1)]; }
+
+// Pythagorean triples for clean integer answers
+const PYTH_TRIPLES = [
+  [3,4,5],[5,12,13],[8,15,17],[7,24,25],[20,21,29],
+  [9,40,41],[6,8,10],[9,12,15],[12,16,20],[15,20,25],
+  [10,24,26],[5,5,Math.round(5*Math.sqrt(2)*10)/10]
+];
+function pythTriple() { return pick(PYTH_TRIPLES.slice(0, 10)); }
+
+/* ============================================================
+   SUBJECT DETECTION
+   ============================================================ */
+function detectSubject(s) {
+  s = s.toLowerCase();
+  if (s.includes('גיאומטר') || s.includes('צורות') || s.includes('זוויות') || s.includes('משולש') || s.includes('עיגול') || s.includes('מעגל')) return 'geometry';
+  if (s.includes('טריגונומטר') || s.includes('טריגו') || s.includes('סינוס') || s.includes('קוסינוס') || s.includes('טנגנס')) return 'trig';
+  if (s.includes('פונקצי'))  return 'functions';
+  if (s.includes('מספרים מכוונים') || s.includes('מכוונים') || s.includes('מכוון') || s.includes('שלמים') || s.includes('חיובי') || s.includes('שלילי')) return 'signed_numbers';
+  if (s.includes('אלגברה') || s.includes('אלגבר') || s.includes('ביטויים אלגבר') || s.includes('משוואה') || s.includes('נעלם') || s.includes('אי-שוויון') || s.includes('אי שוויון') || s.includes('ביטוי') || s.includes('למצוא x') || s.includes('מציאת x') || s.includes('למצוא את x')) return 'algebra';
+  if (s.includes('שבר'))  return 'fractions';
+  if (s.includes('אחוז')) return 'percent';
+  if (s.includes('כפל') || s.includes('חילוק')) return 'mult_div';
+  if (s.includes('חיבור') || s.includes('חיסור') || s.includes('חסור')) return 'add_sub';
+  if (s.includes('סטטיסט') || s.includes('ממוצע') || s.includes('חציון') || s.includes('נתונים')) return 'statistics';
+  if (s.includes('סדרה') || s.includes('סדרות')) return 'sequences';
+  if (s.includes('הסתברות')) return 'probability';
+  if (s.includes('וקטור') || s.includes('מטריצ')) return 'vectors';
+  return 'general';
+}
+
+/* ============================================================
+   GEOMETRY EXERCISES — GRADE-AWARE
+   ============================================================ */
+function geoExercise(diff, band) {
+
+  /* ── כיתות א-ב ── */
+  if (band === 'elem_low') {
+    const easy = [
+      `כמה צלעות יש לריבוע?`, `כמה צלעות יש למשולש?`, `כמה פינות יש למלבן?`,
+      `ציין איזו צורה יש ל: שולחן / גלגל / פיצה`, `צייר ריבוע שצלעו 3 ס"מ`
+    ];
+    const medium = [
+      `ציין אם הצורות זהות, דומות או שונות: ריבוע ומלבן`,
+      `כמה צלעות יש לחמשמש?`, `מה ההבדל בין ריבוע למלבן?`,
+      `ציין כמה פינות ישרות יש למלבן`
+    ];
+    const hard = [
+      `ציין כמה צלעות שוות לריבוע`, `צייר שני משולשים שונים`,
+      `כמה ציר-סימטריה יש לריבוע?`
+    ];
+    return pick(diff === 'easy' ? easy : diff === 'hard' ? hard : medium);
+  }
+
+  /* ── כיתות ג-ד ── */
+  if (band === 'elem_mid') {
+    const a = rnd(3,12), b = rnd(3,12), s = rnd(4,10);
+    const easy = [
+      `חשב את היקף הריבוע כאשר צלעו ${s} ס"מ`,
+      `חשב את היקף המלבן: אורך = ${a} ס"מ, רוחב = ${b} ס"מ`,
+      `ריבוע בעל היקף ${s*4} ס"מ — מה אורך צלעו?`
+    ];
+    const medium = [
+      `חשב את שטח המלבן: אורך = ${a} ס"מ, רוחב = ${b} ס"מ`,
+      `מלבן ששטחו ${a*b} מ"ר ואורכו ${a} מ' — מה רוחבו?`,
+      `חשב היקף ושטח ריבוע עם צלע ${s} ס"מ`
+    ];
+    const hard = [
+      `צורת L מורכבת ממלבן ${a}×${b} ממנו הוצא ריבוע ${rnd(1,Math.min(a,b)-1)}×${rnd(1,Math.min(a,b)-1)}. חשב את שטחה`,
+      `היקף מלבן ${2*(a+b)} ס"מ. אם אורכו גדול פי ${rnd(2,3)} מרוחבו, מצא את מימדיו`,
+      `חשב שטח שני מלבנים: ${a}×${b} ו-${rnd(3,8)}×${rnd(3,8)}. איזה גדול יותר?`
+    ];
+    return pick(diff === 'easy' ? easy : diff === 'hard' ? hard : medium);
+  }
+
+  /* ── כיתות ה-ו ── */
+  if (band === 'elem_high') {
+    const a = rnd(4,16), b = rnd(4,16), h = rnd(3,12), r = rnd(3,9);
+    const easy = [
+      `חשב שטח משולש: בסיס = ${a} ס"מ, גובה = ${h} ס"מ`,
+      `חשב היקף עיגול (קוטר = ${r*2} ס"מ, π ≈ 3.14)`,
+      `חשב שטח ריבוע שצלעו ${a} ס"מ`
+    ];
+    const medium = [
+      `חשב שטח עיגול: רדיוס = ${r} ס"מ (π ≈ 3.14)`,
+      `חשב נפח תיבה: ${a} × ${b} × ${h} ס"מ`,
+      `צורה מורכבת ממלבן ${a}×${b} ומעוד משולש בסיס ${a} גובה ${h}. חשב שטח כולל`
+    ];
+    const hard = [
+      `עיגול חסום בריבוע שצלעו ${r*2} ס"מ. חשב את השטח שבין הריבוע לעיגול (π ≈ 3.14)`,
+      `חשב שטח טרפז: בסיסים ${a} ו-${b} ס"מ, גובה ${h} ס"מ`,
+      `בריכה גלילית: רדיוס ${r} מ', עומק ${h} מ'. חשב נפח (π ≈ 3.14)`
+    ];
+    return pick(diff === 'easy' ? easy : diff === 'hard' ? hard : medium);
+  }
+
+  /* ── כיתות ז-ח ── */
+  if (band === 'middle') {
+    const [a, b, c] = pythTriple();
+    const ang1 = rnd(30,80), ang2 = rnd(20, 90-ang1);
+    const ang3 = 180 - ang1 - ang2;
+    const ext = 180 - ang1;
+    const easy = [
+      `במשולש ישר-זווית: רגל א' = ${a}, רגל ב' = ${b}. חשב את היפותנוזה`,
+      `חשב: סכום הזוויות במשולש הוא 180°. זווית א' = ${ang1}°, זווית ב' = ${ang2}°. מה זווית ג'?`,
+      `ישר עובר בין שתי ישרות מקבילות ויוצר זווית של ${ang1}°. מה הזווית המתחלפת?`,
+      `במשולש שווה-שוקיים: זווית הראש = ${rnd(20,100)}°. מה כל אחת מזוויות הבסיס?`
+    ];
+    const medium = [
+      `משולש ישר-זווית: רגל = ${a}, היפותנוזה = ${c}. חשב את הרגל השנייה`,
+      `שני ישרים מקבילים, חותכן יוצר זווית ${ang1}°. מצא את כל 8 הזוויות הנוצרות`,
+      `במשולש: הזווית החיצונית = ${ext}°. שתי הזוויות הלא-סמוכות = ${ang2}° ו-___. מצא`,
+      `ריבוע בתוך עיגול: אורך האלכסון = ${rnd(6,12)}√2 ס"מ. מצא היקף הריבוע`
+    ];
+    const hard = [
+      `הוכח: הזווית החיצונית של משולש שווה לסכום שתי הזוויות הלא-סמוכות`,
+      `שני משולשים דומים. יחס הדמיון ${rnd(2,4)}:1. הצלע הקצרה של הגדול = ${rnd(8,16)} ס"מ. מצא צלעות הקטן`,
+      `עיגול ומשולש משיקים: הרדיוס = ${rnd(4,8)} ס"מ, הצלע המשיקת = ${rnd(6,14)} ס"מ. חשב שטח כל אחד`,
+      `ב-△ABC: AB=${a}, BC=${b}, AC=${c}. הוכח שהמשולש ישר-זווית`
+    ];
+    return pick(diff === 'easy' ? easy : diff === 'hard' ? hard : medium);
+  }
+
+  /* ── כיתות ט-י ── */
+  if (band === 'high_low') {
+    const [a, b, c] = pythTriple();
+    const ang = pick([30,45,60]);
+    const sinVal = ang===30?'½':ang===45?'√2/2':'√3/2';
+    const cosVal = ang===30?'√3/2':ang===45?'√2/2':'½';
+    const tanVal = ang===30?'√3/3':ang===45?'1':'√3';
+    const hyp = rnd(8,20);
+    const r = rnd(3,8), cx = rnd(-4,4), cy = rnd(-4,4);
+    const easy = [
+      `במשולש ישר-זווית: היפותנוזה = ${hyp}, זווית α = ${ang}°. חשב את הצלע הנגדית לזווית α (sin${ang}° = ${sinVal})`,
+      `חשב: cos${ang}° = ${cosVal}. במשולש ישר-זווית עם היפותנוזה ${hyp}, מצא את הצלע הצמודה לזווית ${ang}°`,
+      `במשולש ישר-זווית: רגל = ${a}, רגל = ${b}. חשב היפותנוזה וזוויות המשולש`,
+      `נקודות A(0,0) ו-B(${rnd(3,8)},${rnd(3,8)}). חשב את המרחק AB`
+    ];
+    const medium = [
+      `במשולש ישר-זווית: זווית α = ${ang}°, הצלע הנגדית = ${rnd(5,15)}. חשב את ההיפותנוזה ואת הצלע הצמודה (sin${ang}°=${sinVal}, cos${ang}°=${cosVal})`,
+      `שני משולשים דומים: יחס 2:3. שטח הקטן = ${rnd(12,40)} ס"מ². חשב שטח הגדול`,
+      `משולש ABC: AB=AC=${rnd(8,14)}, BC=${rnd(6,12)}. מצא גובה על BC וחשב שטח`,
+      `עיגול עם מרכז (${cx},${cy}) ורדיוס ${r}. כתוב משוואתו. האם הנקודה (${cx+r},${cy}) שייכת לעיגול?`
+    ];
+    const hard = [
+      `במשולש ABC: AB=${rnd(6,12)}, BC=${rnd(6,12)}, זווית B=${rnd(40,80)}°. חשב שטח המשולש בעזרת נוסחת שטח (½·a·b·sinC)`,
+      `הוכח: במשולש שווה-צלעות, כל זווית = 60° (השתמש בטריגונומטריה)`,
+      `עיגול: משיק מנקודה P(${rnd(5,10)},0) חוץ למעגל (0,0) r=${rnd(2,4)}. חשב אורך המשיק`,
+      `נתון: sin²α + cos²α = 1. אם sinα = 3/5, חשב cosα, tanα, וגם sin(90°−α)`
+    ];
+    return pick(diff === 'easy' ? easy : diff === 'hard' ? hard : medium);
+  }
+
+  /* ── כיתות יא-יב ── */
+  const r = rnd(2,6), cx = rnd(-5,5), cy = rnd(-5,5);
+  const m = rnd(-4,4) || 1, n = rnd(-6,6);
+  const easy = [
+    `ישר: y = ${m}x + ${n}. מצא חתך-ציר x וחתך-ציר y`,
+    `עיגול: (x−${cx})² + (y−${cy})² = ${r*r}. מהו המרכז? מהו הרדיוס?`,
+    `הוכח: sin²α + cos²α = 1 בעזרת משפט פיתגורס`,
+    `ישרים: y=${m}x+${n} ו-y=${-m}x+${rnd(-5,5)}. האם מאונכים?`
+  ];
+  const medium = [
+    `מצא חיתוך העיגול (x−${cx})²+(y−${cy})²=${r*r} עם הישר y=${m}x+${n}`,
+    `השתמש בנוסחת שטח ½ab·sinC לחישוב שטח משולש: a=${rnd(5,12)}, b=${rnd(5,12)}, C=${pick([30,45,60,90])}°`,
+    `הוכח זהות: tan²α + 1 = 1/cos²α`,
+    `מצא מרחק מהנקודה (${rnd(-3,3)},${rnd(-3,3)}) לישר ${m}x + y + ${n} = 0`
+  ];
+  const hard = [
+    `שני עיגולים: E₁: x²+y²=${r**2}, E₂: (x−${rnd(2,5)})²+(y−${rnd(2,5)})²=${rnd(4,16)}. מצא נקודות חיתוך`,
+    `פתור: sin(2x) = cos(x) בתחום [0°, 360°]`,
+    `הוכח: בכל משולש, a/sinA = b/sinB = c/sinC (משפט הסינוסים)`,
+    `ישר x+${m}y+${n}=0 ומעגל x²+y²=${r**2}. חשב: מרחק המרכז מהישר, מספר נקודות חיתוך`
+  ];
+  return pick(diff === 'easy' ? easy : diff === 'hard' ? hard : medium);
+}
+
+/* ============================================================
+   SIGNED NUMBERS — GRADE-AWARE (כיתות ו-ט בעיקר)
+   ============================================================ */
+function signedNumbersExercise(diff, band) {
+  const a = rnd(2,9), b = rnd(2,9), c = rnd(2,9);
+  const easy = [
+    `(+${a}) + (−${b}) = ___`,
+    `(−${a}) + (−${b}) = ___`,
+    `(+${a}) − (−${b}) = ___`,
+    `(−${a}) + (+${b}) = ___`,
+    `מה הערך המוחלט של −${a}?`,
+    `סדר מהקטן לגדול: −${a}, +${b}, −${c}, 0`,
+    `−${a} + ${b} = ___`,
+    `${b} − ${a+c} = ___`
+  ];
+  const medium = [
+    `(−${a}) × (−${b}) = ___`,
+    `(+${a}) × (−${b}) = ___`,
+    `(−${a*b}) ÷ (−${b}) = ___`,
+    `(−${a}) × ${b} = ___`,
+    `(${a} − ${a+b}) × (−${c}) = ___`,
+    `חשב: −${a} + ${b} − ${c} + ${rnd(1,9)} = ___`,
+    `(−${a}) + (−${b}) − (−${c}) = ___`,
+    `${rnd(2,5)} × (−${a}) + ${rnd(2,4)} × ${b} = ___`
+  ];
+  const hard = [
+    `חשב: (−${a})² = ___`,
+    `חשב: −${a}² = ___ (האם זה אותו דבר?)`,
+    `חשב: (−${a}) × (−${b}) ÷ (−${c}) = ___`,
+    `חשב: (−${a} + ${b}) × (${c} − ${a+b}) = ___`,
+    `פתור: −${a}x = ${a*b} (x = ___)`,
+    `חשב: (−${a})³ = ___`,
+    `חשב: (−${a})² + (−${b})² = ___`,
+    `סדר וחשב: (−${a}) + (−${b})² − ${c} = ___`
+  ];
+  return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+}
+
+/* ============================================================
+   ALGEBRA EXERCISES — GRADE-AWARE
+   ============================================================ */
+function algebraExercise(diff, band, gradeNum) {
+  gradeNum = gradeNum || 7;
+  if (band === 'elem_low') {
+    const c = rnd(5,15), b = rnd(1,c-1);
+    const easy   = [`השלם: ___ + ${b} = ${c}`, `השלם: ${c} − ___ = ${b}`, `מה המספר? ○ + ${b} = ${c}`];
+    const medium = [`השלם: ${b} + ___ = ${c}`, `___ × ${rnd(2,4)} = ${rnd(2,4)*rnd(2,6)}`];
+    const hard   = [`___ + ___ = ${c} (מצא שתי אפשרויות)`, `${rnd(2,5)} × ___ = ${rnd(2,5)*rnd(2,6)}`];
+    return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+  }
+  if (band === 'elem_mid') {
+    const a=rnd(2,5), b=rnd(1,9), sol=rnd(2,9);
+    const easy   = [`פתור: x + ${b} = ${sol+b}`, `פתור: x − ${b} = ${sol}`];
+    const medium = [`פתור: ${a}x = ${a*sol}`, `פתור: x/${a} = ${sol}`];
+    const hard   = [`פתור: ${a}x + ${b} = ${a*sol+b}`, `פתור: ${a}x − ${b} = ${a*sol-b}`];
+    return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+  }
+  if (band === 'elem_high') {
+    const a=rnd(2,5), b=rnd(1,9), sol=rnd(1,10);
+    const easy   = [`פתור: ${a}x + ${b} = ${a*sol+b}`, `פתור: x/${a} + ${b} = ${sol+b}`];
+    const medium = [`פתור: ${a}x − ${b} = ${a*sol-b}`, `פתור: ${b} − ${a}x = ${b-a*sol}`];
+    const hard   = [`פתור: ${a}(x + ${b}) = ${a*(sol+b)}`, `פתור: x/${a} − ${b} = ${sol-b}`];
+    return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+  }
+  if (band === 'middle') {
+    const a=rnd(2,5), b=rnd(1,8), c=rnd(2,4), d=rnd(1,8), sol=rnd(1,8);
+
+    if (gradeNum <= 7) {
+      // כיתה ז: משוואה לינארית ב-x אחד, עם סוגריים והוצאת גורם
+      const easy = [
+        `פתור: ${a}x + ${b} = ${a*sol+b}`,
+        `פתור: ${a}x − ${b} = ${a*sol-b}`,
+        `פתור: x + ${b} = ${sol+b}`,
+        `פתור: ${a}x = ${a*sol}`
+      ];
+      const medium = [
+        `פתור: ${a}(x + ${b}) = ${a*(sol+b)}`,
+        `פתור: ${a}(x − ${b}) = ${a*(sol-b)}`,
+        `פתור: ${a}x + ${b} = ${c}x + ${d}`,
+        `פתור: ${b} − ${a}x = ${b - a*sol}`
+      ];
+      const hard = [
+        `פתור: ${a}(${b} − x) = ${a}(x + ${d})`,
+        `פתור: ${a}(x + ${b}) − ${c}(x − ${d}) = ${a*(sol+b) - c*(sol-d)}`,
+        `פתור: ${a}(x + ${b}) = ${c}(x + ${d})`,
+        `פתור: ${a}x − ${b}(x − ${c}) = ${d}`
+      ];
+      return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+    } else {
+      // כיתה ח: משוואות עם שברים ומערכת 2 נעלמים
+      const x1=rnd(1,6), y1=rnd(1,6), x2=rnd(1,4), y2=rnd(1,4);
+      const r1 = x1+y1, r2 = x1-y1;
+      const easy = [
+        `פתור: ${a}x + ${b} = ${c}x + ${d}`,
+        `פתור: ${a}(x − ${b}) = ${c}(x + ${d})`
+      ];
+      const medium = [
+        `פתור את המערכת: { x + y = ${r1} ; x − y = ${r2} }`,
+        `פתור: ${a}x + ${b} > ${a*sol+b} (אי-שוויון — הצג על ציר המספרים)`
+      ];
+      const hard = [
+        `פתור את המערכת: { ${a}x + ${b}y = ${a*x1+b*y1} ; ${c}x − ${d}y = ${c*x1-d*y1} }`,
+        `פתור את המערכת: { ${x2}x + y = ${x2*x1+y1} ; x − ${y2}y = ${x1-y2*y1} }`
+      ];
+      return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+    }
+  }
+  if (band === 'high_low') {
+    const p=rnd(-8,8), q=rnd(-12,12);
+    const r1=rnd(-5,5), r2=rnd(-5,5);
+    const A=1, B=-(r1+r2), C=r1*r2;
+    const Bstr = B>0?`+${B}`:B<0?`${B}`:'';
+    const Cstr = C>0?`+${C}`:C<0?`${C}`:'';
+    const disc = rnd(1,6)**2;
+    const easy = [
+      `פתור ריבועית: x² ${Bstr}x ${Cstr} = 0 (על ידי פירוק לגורמים)`,
+      `פתור: (x+${r1})(x+${r2}) = 0`,
+      `מצא x: x² = ${rnd(1,10)**2}`
+    ];
+    const medium = [
+      `פתור בנוסחה: x² + ${p}x + ${q} = 0`,
+      `מצא פסגת הפרבולה: y = x² + ${p}x + ${q}`,
+      `פתור אי-שוויון: x² ${Bstr}x ${Cstr} < 0`
+    ];
+    const hard = [
+      `מצא חיתוך הפרבולה y = x² + ${p}x + ${q} עם הישר y = ${rnd(-5,10)}x + ${rnd(-8,8)}`,
+      `פתור מערכת: { y = x² + ${p}x + ${q} ; y = ${rnd(-3,3)}x + ${rnd(-5,5)} }`,
+      `הוכח שה-x של הפסגה הוא −b/(2a) בפרבולה y=ax²+bx+c`
+    ];
+    return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+  }
+  // high_high
+  const a=rnd(1,4), b=rnd(-6,6), c=rnd(-8,8);
+  const easy   = [`גזור: f(x) = ${a}x³ + ${b}x² + ${c}x`, `מצא נקודות קיצון: f(x) = x² + ${b}x + ${c}`];
+  const medium = [
+    `פתור: |x + ${b}| = ${rnd(2,8)}`,
+    `חשב lim(x→${rnd(1,5)}) [(x²−${rnd(4,25)})/(x−${rnd(2,5)})]`
+  ];
+  const hard   = [
+    `נתון f(x) = ${a}x³ + ${b}x² + ${c}x. מצא נקודות קיצון ונקודת פיתול`,
+    `פתור: log₂(x+${rnd(1,8)}) + log₂(x−${rnd(1,4)}) = ${rnd(3,6)}`
+  ];
+  return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+}
+
+/* ============================================================
+   FRACTIONS — GRADE-AWARE
+   ============================================================ */
+function fractionsExercise(diff, band) {
+  const d1=rnd(2,8), d2=rnd(2,8), n1=rnd(1,d1-1), n2=rnd(1,d2-1);
+  if (band <= 'elem_mid') {
+    const easy   = [`ציין אם ${n1}/${d1} גדול, קטן או שווה ל-½`, `פשט: ${n1*2}/${d1*2}`, `${n1}/${d1} = ___/${d1*3}`];
+    const medium = [`${n1}/${d1} + ${n2}/${d1} = ___`, `${n1+n2}/${d1} − ${n2}/${d1} = ___`];
+    const hard   = [`${n1}/${d1} + ${n2}/${d2} = ___`, `${n1}/${d1} × ${n2}/${d2} = ___`];
+    return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+  }
+  if (band === 'elem_high') {
+    const w1=rnd(1,3);
+    const easy   = [`${n1}/${d1} + ${n2}/${d2} = ___`, `פשט: ${n1*3}/${d1*3}`];
+    const medium = [`${w1} + ${n1}/${d1} = ___`, `${w1}${n1}/${d1} − ${n2}/${d2} = ___`];
+    const hard   = [`${n1}/${d1} ÷ ${n2}/${d2} = ___`, `(${n1}/${d1} + ${n2}/${d2}) × ${rnd(2,5)} = ___`];
+    return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+  }
+  // middle+
+  const a=rnd(2,5), b=rnd(1,9);
+  const easy   = [`פשט: (${a}x²)/(${a*rnd(2,3)}x)`, `חשב: ${n1}/${d1} + ${n2}/${d2} + ${rnd(1,d1)}/${d1}`];
+  const medium = [`פשט: (x²−${b**2})/((x+${b})(x−${rnd(1,5)}))`, `פתור: ${n1}/${d1}·x = ${rnd(2,10)}`];
+  const hard   = [`חשב: (${a}/${b}x − ${rnd(1,5)}) ÷ (${rnd(2,4)}/${b}x)`, `פשט: (x²+${2*b}x+${b**2})/(x+${b})`];
+  return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+}
+
+/* ============================================================
+   PERCENT — GRADE-AWARE
+   ============================================================ */
+function percentExercise(diff, band) {
+  const base = rnd(2,20)*10, pct = [10,15,20,25,30,40,50,75][rnd(0,7)];
+  if (band <= 'elem_high') {
+    const easy   = [`חשב ${pct}% מ-${base}`, `מה הם 50% מ-${base}?`];
+    const medium = [`חנות: מוצר ${base} ₪, הנחה ${pct}%. מה המחיר החדש?`, `${pct}% מ-___ = ${base*pct/100}`];
+    const hard   = [`מחיר עלה ב-${pct}% ל-${Math.round(base*(1+pct/100))} ₪. מה היה המחיר המקורי?`, `${rnd(20,80)} הוא ${pct}% ממה?`];
+    return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+  }
+  const oldP = rnd(100,600), rise = rnd(10,45);
+  const newP = Math.round(oldP*(1+rise/100));
+  const easy   = [`חשב ${pct}% מ-${base}`, `מה אחוז ה-${rnd(10,50)} מ-${rnd(50,200)}?`];
+  const medium = [
+    `מחיר עלה ב-${rise}% ל-${newP} ₪. מה המחיר המקורי?`,
+    `מחיר עלה ב-${rise}% ואחר-כך ירד ב-${rnd(10,30)}%. מה שינוי האחוז הכולל?`
+  ];
+  const hard   = [
+    `ריבית דריבית: קרן ${base*10} ₪, ריבית ${rnd(3,8)}% לשנה. כמה אחרי ${rnd(2,5)} שנים?`,
+    `אחרי שתי הנחות עוקבות (${pct}% ו-${rise}%) מוצר עולה ${rnd(50,200)} ₪. מה היה מחירו המקורי?`
+  ];
+  return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+}
+
+/* ============================================================
+   MULTIPLICATION / DIVISION — GRADE-AWARE
+   ============================================================ */
+function multDivExercise(diff, band) {
+  if (band === 'elem_low') {
+    const a=rnd(1,5), b=rnd(1,5);
+    return pick(diff==='easy'?[`${a} × ${b} = ___`,`${a*2} ÷ ${a} = ___`]:diff==='hard'?[`${a} × ${b} × ${rnd(1,3)} = ___`]:[`${rnd(2,9)} × ${rnd(2,9)} = ___`,`${rnd(10,36)} ÷ ${rnd(2,6)} = ___`]);
+  }
+  if (band === 'elem_mid') {
+    const a=rnd(2,9), b=rnd(2,9);
+    const easy   = [`${a} × ${b} = ___`, `${a*b} ÷ ${b} = ___`, `${a} × 10 = ___`];
+    const medium = [`${rnd(10,30)} × ${rnd(2,9)} = ___`, `${rnd(50,200)} ÷ ${rnd(2,5)} = ___`];
+    const hard   = [`${rnd(3,8)} × ${rnd(3,8)} × ${rnd(2,4)} = ___`, `${rnd(100,500)} ÷ ${rnd(4,8)} = ___ שלמים ו-___ שארית`];
+    return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+  }
+  if (band === 'elem_high') {
+    const a=rnd(10,99), b=rnd(10,99);
+    const easy   = [`${a} × ${rnd(2,9)} = ___`, `${rnd(100,999)} ÷ ${rnd(2,9)} = ___`];
+    const medium = [`${a} × ${b} = ___`, `מצא מחלקים של ${rnd(12,60)}`];
+    const hard   = [`מצא מ.מ.כ ומ.מ.ש של ${rnd(12,30)} ו-${rnd(12,30)}`, `פרק לגורמים ראשוניים: ${rnd(20,100)}`];
+    return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+  }
+  // middle+: חשיבה מספרית גבוהה יותר
+  const a=rnd(2,6), b=rnd(2,6);
+  const easy   = [`חשב: ${a}² × ${b}² = ___`, `פרק לגורמים ראשוניים: ${rnd(30,200)}`];
+  const medium = [`מצא מ.מ.כ ומ.מ.ש של ${rnd(12,40)}, ${rnd(12,40)} ו-${rnd(12,40)}`, `חשב: √${[4,9,16,25,36,49,64,81,100][rnd(0,8)]} × √${[4,9,16,25,36][rnd(0,4)]}`];
+  const hard   = [`פשט: ${a}^${rnd(3,5)} × ${a}^${rnd(2,4)} ÷ ${a}^${rnd(1,3)}`, `הוכח שה-√2 הוא מספר אי-רציונלי`];
+  return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+}
+
+/* ============================================================
+   ADDITION / SUBTRACTION — GRADE-AWARE
+   ============================================================ */
+function addSubExercise(diff, band) {
+  if (band === 'elem_low') {
+    const a=rnd(1,10), b=rnd(1,10);
+    const easy   = [`${a} + ${b} = ___`, `${a+b} − ${b} = ___`, `___ + ${a} = ${a+b}`];
+    const medium = [`${rnd(10,20)} + ${rnd(1,9)} = ___`, `${rnd(15,25)} − ${rnd(1,9)} = ___`];
+    const hard   = [`${rnd(15,30)} + ${rnd(15,30)} = ___`, `${rnd(20,50)} − ${rnd(10,20)} = ___`];
+    return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+  }
+  if (band === 'elem_mid') {
+    const a=rnd(50,300), b=rnd(50,300);
+    const easy   = [`${a} + ${b} = ___`, `${a+b} − ${b} = ___`];
+    const medium = [`${a} + ${b} + ${rnd(10,99)} = ___`, `${a+b} − ${rnd(10,99)} = ___`];
+    const hard   = [`${rnd(500,999)} − ${rnd(100,499)} = ___`, `חשב בקיצור: 99 + ${rnd(100,500)}`];
+    return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+  }
+  if (band === 'elem_high') {
+    const a=rnd(1,9), b=rnd(1,99), c=rnd(1,9), d=rnd(1,9);
+    const easy   = [`${rnd(100,999)} + ${rnd(100,999)} = ___`];
+    const medium = [`${a}.${b} + ${c}.${d} = ___`, `${rnd(1000,9999)} − ${rnd(100,999)} = ___`];
+    const hard   = [`${a}.${b} − ${rnd(0,a-1)}.${rnd(1,9)} = ___`, `(${rnd(100,500)} + ${rnd(50,200)}) − (${rnd(50,150)} + ${rnd(10,80)}) = ___`];
+    return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+  }
+  // middle+ — חיבור/חיסור ביטויים אלגבריים
+  const a=rnd(2,6), b=rnd(1,8), c=rnd(2,5), d=rnd(1,8);
+  const easy   = [`פשט: ${a}x + ${b} + ${c}x − ${d}`];
+  const medium = [`פשט: (${a}x + ${b}) + (${c}x² − ${d}x + ${rnd(1,5)})`, `חשב: (${a}x + ${b}) − (${c}x − ${d})`];
+  const hard   = [`פשט: ${a}(x+${b}) + ${c}(${d}−x)`, `הרחב: (x+${b})(x+${d}) − (x−${b})(x+${d})`];
+  return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+}
+
+/* ============================================================
+   STATISTICS — GRADE-AWARE
+   ============================================================ */
+function statsExercise(diff, band) {
+  const data = Array.from({length:rnd(5,8)}, ()=>rnd(50,100));
+  const sorted = [...data].sort((a,b)=>a-b);
+  const sum = data.reduce((s,v)=>s+v,0);
+  const avg = (sum/data.length).toFixed(1);
+  if (band <= 'elem_high') {
+    return pick([`חשב ממוצע: ${data.slice(0,5).join(', ')}`, `מהו הערך הגבוה ביותר בסדרה: ${data.slice(0,5).join(', ')}?`]);
+  }
+  if (band === 'middle') {
+    const easy   = [`חשב ממוצע: ${data.join(', ')}`, `מצא חציון: ${sorted.join(', ')}`];
+    const medium = [`חשב ממוצע, חציון ושכיח: ${data.join(', ')}`, `מה הטווח? ${sorted.join(', ')}`];
+    const hard   = [`5 תלמידים קיבלו ציונים: ${data.slice(0,5).join(', ')}. נוסף תלמיד שישי — הממוצע עלה ל-${(sum/data.length+rnd(1,5)).toFixed(0)}. מה ציון התלמיד החדש?`];
+    return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+  }
+  // high
+  const vals = Array.from({length:6}, ()=>rnd(55,95));
+  const mean = (vals.reduce((s,v)=>s+v,0)/vals.length).toFixed(1);
+  const easy   = [`חשב ממוצע וסטיית תקן לדגימה: ${vals.join(', ')}`];
+  const medium = [`ממוצע 6 ציונים = ${mean}. מצא 5 הציונים הנתונים: ${vals.slice(0,5).join(', ')}. מה הציון השישי?`, `חשב שונות: ${vals.join(', ')}`];
+  const hard   = [`בדוק: האם הנתונים ${vals.join(', ')} מתפלגים נורמלית? חשב ממוצע וסטיית תקן`, `${rnd(20,40)}% מהמדגם נמצאים מתחת ל-70. מה הממוצע אם σ=${rnd(8,15)}? (הסבר)`];
+  return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+}
+
+/* ============================================================
+   SEQUENCES — GRADE-AWARE
+   ============================================================ */
+function seqExercise(diff, band) {
+  const a1=rnd(1,10), d=rnd(1,8), q=rnd(2,4);
+  const seq5 = Array.from({length:5},(_,i)=>a1+i*d).join(', ');
+  const gseq5 = Array.from({length:5},(_,i)=>a1*q**i).join(', ');
+  const n = rnd(5,15);
+  if (band <= 'middle') {
+    const easy   = [`מצא האיבר הבא: ${seq5}, ___`, `מצא האיבר הבא: ${a1}, ${a1*q}, ${a1*q*q}, ___`];
+    const medium = [`סדרה חשבונית: ${seq5}. מצא: הפרש, האיבר ה-${n}`, `סדרה גיאומטרית: ${a1}, ${a1*q}, ${a1*q**2}. מצא: מנה, האיבר ה-${rnd(4,7)}`];
+    const hard   = [`חשב סכום ${n} האיברים הראשונים בסדרה החשבונית: ${seq5}`];
+    return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+  }
+  const S = n*(2*a1+(n-1)*d)/2;
+  const easy   = [`סדרה חשבונית: a₁=${a1}, d=${d}. מצא a₁₀ ו-S₁₀`, `סדרה גיאומטרית: a₁=${a1}, q=${q}. מצא a₅`];
+  const medium = [`ב-S_n = ${S}: סדרה חשבונית a₁=${a1}, d=${d}. מצא n`, `סדרה גיאומטרית: ${gseq5}. חשב S₆`];
+  const hard   = [`הוכח: S_n = n/2·(2a₁+(n-1)d)`, `סדרה גיאומטרית אינסופית: a₁=${a1}, |q|=${rnd(1,4)}/10. מצא סכום לאינסוף`];
+  return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+}
+
+/* ============================================================
+   TRIGONOMETRY — GRADE-AWARE
+   ============================================================ */
+function trigExercise(diff, band) {
+  const ang = pick([30,45,60,90,120,135,150]);
+  const hyp = rnd(6,20), side = rnd(3,12);
+  const sinVal = {30:'½',45:'√2/2',60:'√3/2',90:'1',120:'√3/2',135:'√2/2',150:'½'}[ang] || '?';
+  const cosVal = {30:'√3/2',45:'√2/2',60:'½',90:'0',120:'-½',135:'-√2/2',150:'-√3/2'}[ang] || '?';
+  if (band === 'high_low') {
+    const easy   = [`חשב sin${ang}° + cos${ang}°`, `במשולש ישר-זווית: היפותנוזה=${hyp}, זווית=${pick([30,45,60])}°. חשב את שתי הרגליים`];
+    const medium = [`שטח משולש: a=${hyp}, b=${rnd(5,15)}, C=${pick([30,45,60,90])}°. חשב שטח בעזרת ½ab·sinC`, `מצא זווית α: tanα = ${pick(['1','√3','1/√3','√3/3'])}`];
+    const hard   = [`פתור: 2sin²x − sinx − 1 = 0 בתחום [0°,360°]`, `הוכח: (sinx + cosx)² = 1 + 2sinx·cosx`];
+    return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+  }
+  // high_high
+  const easy   = [`הוכח: tanx = sinx/cosx`, `פשט: sin(180°−x)`, `חשב: sin²30° + cos²30°`];
+  const medium = [`פתור: sin(2x) = √3/2 בתחום [0,2π]`, `הוכח: cos(A+B) = cosA·cosB − sinA·sinB`, `חשב שטח משולש ABC: a=${hyp}, b=${rnd(5,15)}, C=${pick([30,45,60,120])}°`];
+  const hard   = [`פתור: 2cos²x − 3cosx + 1 = 0`, `הוכח משפט הסינוסים: a/sinA = 2R`, `פתור: sinx + sin2x = 0 בתחום [0,2π]`];
+  return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+}
+
+/* ============================================================
+   FUNCTIONS — HIGH SCHOOL
+   ============================================================ */
+function functionsExercise(diff, band) {
+  const a=rnd(1,4), b=rnd(-5,5), c=rnd(-6,6);
+  const m=rnd(-3,3)||1, n=rnd(-5,5);
+  const easy   = [
+    `f(x) = ${a}x + ${b}. חשב f(${rnd(-3,5)})`,
+    `מצא תחום הגדרה: f(x) = √(x − ${rnd(1,6)})`,
+    `ישר y = ${m}x + ${n}: מה השיפוע? מה חתך-y?`
+  ];
+  const medium = [
+    `f(x) = x² + ${b}x + ${c}. מצא קודקוד, מצא חיתוך עם x`,
+    `f(x) = ${a}x² + ${b}x + ${c}. מתי f(x) > 0?`,
+    `מצא חיתוך: f(x) = x² + ${b}x + ${c} ו-g(x) = ${m}x + ${n}`
+  ];
+  const hard   = [
+    `גזור: f(x) = ${a}x³ + ${b}x² + ${c}x. מצא נקודות קיצון ובדוק מינימום/מקסימום`,
+    `f(x) = (x+${b})/(x+${c}). מצא תחום, חסימה, אסימפטוטות`,
+    `הוכח: f(x) = ${a}x² + ${b}x + ${c} חיובית לכל x אמ"מ b²−4ac < 0`
+  ];
+  return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+}
+
+/* ============================================================
+   PROBABILITY
+   ============================================================ */
+function probabilityExercise(diff, band) {
+  const n=rnd(3,8), k=rnd(1,n-1);
+  const easy   = [`שק מכיל ${n} כדורים: ${k} אדומים ו-${n-k} כחולים. מה ההסתברות להוצאת כדור אדום?`, `הטלת קוביה: P(זוגי) = ?`];
+  const medium = [
+    `הטלת 2 קוביות: P(סכום = ${rnd(5,10)}) = ?`,
+    `${n} תלמידים, ${k} בנות. נבחרת ועדה של ${rnd(2,3)}. P(כולן בנות)?`
+  ];
+  const hard   = [
+    `${rnd(3,6)} הגרלות עצמאיות. P(ניצחון פעם אחת לפחות) אם P(ניצחון כל פעם) = ${rnd(1,4)}/10`,
+    `הסתברות מותנית: P(A)=${rnd(3,7)}/10, P(B|A)=${rnd(2,6)}/10. חשב P(A∩B) ו-P(A∪B)`
+  ];
+  return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+}
+
+/* ============================================================
+   GENERAL FALLBACK — GRADE-AWARE
+   ============================================================ */
+function generalExercise(diff, band, gradeNum) {
+  gradeNum = gradeNum || 7;
+  if (band === 'elem_low') {
+    return addSubExercise(diff, band);
+  }
+  if (band === 'elem_mid') {
+    return diff === 'hard' ? multDivExercise(diff, band) : addSubExercise(diff, band);
+  }
+  if (band === 'elem_high') {
+    const fns = [()=>addSubExercise(diff,band), ()=>multDivExercise(diff,band), ()=>fractionsExercise(diff,band), ()=>percentExercise(diff,band)];
+    return pick(fns)();
+  }
+  if (band === 'middle') {
+    const fns = [()=>algebraExercise(diff,band,gradeNum), ()=>geoExercise(diff,band), ()=>statsExercise(diff,band), ()=>percentExercise(diff,band)];
+    return pick(fns)();
+  }
+  if (band === 'high_low') {
+    const fns = [()=>algebraExercise(diff,band,gradeNum), ()=>geoExercise(diff,band), ()=>trigExercise(diff,band)];
+    return pick(fns)();
+  }
+  const fns = [()=>algebraExercise(diff,band,gradeNum), ()=>functionsExercise(diff,band), ()=>trigExercise(diff,band)];
+  return pick(fns)();
+}
+
+/* ============================================================
+   MAIN DISPATCHER
+   ============================================================ */
+function makeExercise(subject, difficulty, gradeNum, index) {
+  const band = getBand(gradeNum);
+  const type = detectSubject(subject);
+  switch(type) {
+    case 'geometry':      return geoExercise(difficulty, band);
+    case 'trig':          return trigExercise(difficulty, band);
+    case 'functions':     return functionsExercise(difficulty, band);
+    case 'algebra':       return algebraExercise(difficulty, band, gradeNum);
+    case 'signed_numbers':return signedNumbersExercise(difficulty, band);
+    case 'fractions':     return fractionsExercise(difficulty, band);
+    case 'percent':       return percentExercise(difficulty, band);
+    case 'mult_div':      return multDivExercise(difficulty, band);
+    case 'add_sub':       return addSubExercise(difficulty, band);
+    case 'statistics':    return statsExercise(difficulty, band);
+    case 'sequences':     return seqExercise(difficulty, band);
+    case 'probability':   return probabilityExercise(difficulty, band);
+    default:              return generalExercise(difficulty, band, gradeNum);
+  }
+}
+
+/* ============================================================
+   VERBAL QUESTIONS — GRADE-AWARE
+   ============================================================ */
+function makeVerbalQuestion(subject, difficulty, gradeNum, index) {
+  const band = getBand(gradeNum);
+  const type = detectSubject(subject);
+
+  if (type === 'geometry' || type === 'trig') return geoVerbal(difficulty, band);
+  if (type === 'algebra' || type === 'functions') return algebraVerbal(difficulty, band);
+  if (type === 'signed_numbers') return signedNumbersVerbal(difficulty, band);
+  if (type === 'percent') return percentVerbal(difficulty, band);
+  if (type === 'statistics') return statsVerbal(difficulty, band);
+  return generalVerbal(difficulty, band);
+}
+
+function signedNumbersVerbal(diff, band) {
+  const a = rnd(3,15), b = rnd(2,10), rise = rnd(3,12), drop = rnd(2,8);
+  const easy = [
+    `חום בירושלים בלילה: −${a}°. ביום עלה ב-${a+b} מעלות. מה הטמפרטורה ביום?`,
+    `מעלית בקומה −${rnd(1,3)} (מרתף). עלתה ${rnd(3,8)} קומות. באיזו קומה עכשיו?`,
+    `חשבון בנק: יתרה −${a*100} ₪. הופקדו ${a*100+b*50} ₪. מה היתרה כעת?`
+  ];
+  const medium = [
+    `טמפרטורה: בבוקר −${a}°, בצהריים עלתה ב-${rise}°, בערב ירדה ב-${drop}°. מה הטמפרטורה בערב?`,
+    `עסק רשם רווח של ${a*1000} ₪ בינואר, הפסד של ${b*1000} ₪ בפברואר, ורווח של ${(a-b+rnd(1,5))*1000} ₪ במרץ. מה הרווח/הפסד הכולל?`,
+    `צלילן צולל ממפלס 0. יורד ${a} מ', עולה ${rnd(2,a-1)} מ', ואז יורד שוב ${b} מ'. באיזה מפלס עומד?`
+  ];
+  const hard = [
+    `שתי ערים: א' בגובה ${a*100} מ' מעל פני הים, ב' בגובה −${b*100} מ' (מתחת). מה ההפרש בגובה? אם הטמפרטורה יורדת ב-${rnd(1,3)}° לכל 100 מ', מה הפרש הטמפרטורה?`,
+    `מניה: נפתחה ב-${a*10} ₪, ירדה ${b}% בשלישי, עלתה ${rnd(3,8)}% ברביעי. מה שוויה בסוף יום רביעי?`,
+    `${rnd(3,6)} ספורטאים השיגו זמנים (בשניות) ביחס לשיא: +${rnd(1,5)}, −${rnd(1,3)}, +${rnd(2,6)}, −${rnd(1,4)}, +${rnd(1,3)}. מי קרוב ביותר לשיא? מה הממוצע?`
+  ];
+  return pick(diff==='easy'?easy:diff==='hard'?hard:medium);
+}
+
+function geoVerbal(diff, band) {
+  if (band <= 'elem_mid') {
+    const a=rnd(3,12), b=rnd(3,10);
+    const pool = [
+      `חצר בית ספר בצורת מלבן: אורך ${a} מ', רוחב ${b} מ'. חשב היקף וגדר עולה ${rnd(50,200)} ₪ למטר — מה העלות?`,
+      `ריבוע שצלעו ${a} ס"מ — חשב היקפו ושטחו`,
+      `מגרש מלבני שאורכו ${a*2} מ' ורוחבו ${b} מ'. אתה מהלך את היקפו — כמה מטרים?`
+    ];
+    return pick(pool);
+  }
+  if (band === 'elem_high') {
+    const r=rnd(4,10), a=rnd(5,15), h=rnd(4,12);
+    return pick([
+      `בריכה גלילית: רדיוס ${r} מ', עומק ${h} מ'. חשב נפח המים (π≈3.14) וכמה ליטר (1 מ"ק = 1000 ל')`,
+      `גינה בצורת משולש: בסיס ${a} מ', גובה ${h} מ'. חשב שטח. אם גידור עולה ${rnd(20,80)} ₪ למטר ושלוש צלעות הן ${a}, ${rnd(a,a+6)}, ${rnd(h,h+4)}, חשב עלות`,
+      `עיגול ומלבן בעלי שטח שווה. רדיוס העיגול ${r} ס"מ. אורך המלבן ${a} ס"מ — חשב רוחבו (π≈3.14)`
+    ]);
+  }
+  if (band === 'middle') {
+    const [a,b,c] = pythTriple();
+    return pick([
+      `סולם בן ${c} מ' נשען על קיר. רגלו ${b} מ' מהקיר. עד כמה גובה מגיע?`,
+      `מגרש מלבני ${rnd(20,50)}×${rnd(15,40)} מ'. נמתח גדר לאורך האלכסון. מה אורך האלכסון? (פיתגורס)`,
+      `שתי תחנות: האחת ${a} ק"מ צפונה, השנייה ${b} ק"מ מזרחה. מה המרחק ביניהן?`
+    ]);
+  }
+  if (band === 'high_low') {
+    const ang = pick([30,45,60]), hyp = rnd(10,30);
+    const sinV = {30:'0.5',45:'0.707',60:'0.866'}[ang];
+    const cosV = {30:'0.866',45:'0.707',60:'0.5'}[ang];
+    return pick([
+      `עפיפון קשור בחוט באורך ${hyp} מ'. החוט יוצר זווית ${ang}° עם הקרקע. מה גובה העפיפון? (sin${ang}°≈${sinV})`,
+      `מגדל גבוה ${hyp} מ'. מנקודה בקרקע זווית הראייה לפסגה היא ${ang}°. מה המרחק מבסיס המגדל? (tan${ang}°≈${({30:'0.577',45:'1',60:'1.732'})[ang]})`,
+      `שיפוע כביש ${ang}°. רכב נסע ${hyp} ק"מ לאורך הכביש. כמה עלה בגובה? (sin${ang}°≈${sinV})`
+    ]);
+  }
+  // high_high
+  return pick([
+    `מגדל ב-A, נקודת תצפית ב-B. מ-A זווית ירידה ל-B היא ${rnd(20,50)}°, מ-B זווית עלייה ל-A היא ${rnd(20,50)}°. המרחק הישיר AB = ${rnd(100,500)} מ'. חשב גובה המגדל`,
+    `שני עיגולים משיקים חיצונית: r₁=${rnd(2,6)}, r₂=${rnd(2,6)}. מצא קו המחבר מרכזיהם ואורך המשיק המשותף`,
+    `שטח מצולע משוכלל עם ${rnd(5,8)} צלעות, כל צלע ${rnd(4,10)} ס"מ. חשב שטח וההיקף (עם נוסחה אנליטית)`
+  ]);
+}
+
+function algebraVerbal(diff, band) {
+  if (band <= 'elem_high') {
+    const price=rnd(5,20), count=rnd(3,10), total=price*count;
+    return pick([
+      `לדניאל יש ${total} ₪. הוא רכש ${count} כרטיסים לקולנוע. כמה עולה כל כרטיס?`,
+      `ספר עולה ${price} ₪. כמה ספרים אפשר לקנות ב-${total} ₪? כמה כסף יישאר?`
+    ]);
+  }
+  if (band === 'middle') {
+    const a=rnd(5,20), b=rnd(2,8);
+    return pick([
+      `אחים: הבכור מבוגר ב-${b} שנים מהצעיר. סכום גילאיהם ${a*2+b}. מצא גיל כל אחד`,
+      `מאגר מים מתמלא ב-${a} שעות בברז גדול ו-${a+rnd(2,8)} שעות בברז קטן. תוך כמה שעות יתמלא אם שניהם פועלים?`,
+      `עובד מרוויח ${rnd(50,100)} ₪ לשעה. ${rnd(2,5)} שעות נוספות מתוגמלות ב-${rnd(30,60)}% תוספת. חשב שכר ל-${rnd(8,12)} שעות כולל נוספות`
+    ]);
+  }
+  // high
+  const v1=rnd(40,80), v2=rnd(80,140), dist=rnd(200,500);
+  return pick([
+    `שני רכבים יוצאים מנקודות מרוחקות ${dist} ק"מ לקראת זה. מהירויות: ${v1} ו-${v2} קמ"ש. תוך כמה זמן ייפגשו ואיפה?`,
+    `השקעה: ${rnd(5000,20000)} ₪ ב-${rnd(3,8)}% ריבית שנתית דריבית. כמה אחרי ${rnd(3,7)} שנים? (נוסחת ריבית דריבית)`,
+    `ייצור: מכונה א' מייצרת ${rnd(50,200)} יחידות ביום, מכונה ב' − ${rnd(50,200)} יחידות. יחד כמה ימים לייצר ${rnd(1000,5000)} יחידות?`
+  ]);
+}
+
+function percentVerbal(diff, band) {
+  const price=rnd(100,500)*2, pct=pick([10,15,20,25,30]);
+  const pool_easy = [
+    `מחיר מוצר: ${price} ₪. הנחה ${pct}%. מה המחיר לאחר הנחה?`,
+    `כיתה: ${rnd(25,35)} תלמידים. ${pct}% לא הגיעו. כמה נוכחים?`
+  ];
+  const pool_medium = [
+    `מחיר עלה ב-${pct}% ל-${Math.round(price*(1+pct/100))} ₪. מה היה המחיר?`,
+    `חנות נתנה ${pct}%, אח"כ עוד ${pct}% הנחה. מה ההנחה הכוללת באחוזים?`
+  ];
+  const pool_hard = [
+    `ריבית שנתית ${pct}% (דריבית). מה הסכום לאחר ${rnd(3,7)} שנים אם ההשקעה הראשונית ${rnd(5000,20000)} ₪?`,
+    `מחיר דירה עלה ב-${pct}% לשנה שנתיים ברציפות. מה עלייה כוללת? האם זהה לעלייה של ${pct*2}%?`
+  ];
+  return pick(diff==='easy'?pool_easy:diff==='hard'?pool_hard:pool_medium);
+}
+
+function statsVerbal(diff, band) {
+  const scores = Array.from({length:rnd(5,8)}, ()=>rnd(60,100));
+  const avg = (scores.reduce((s,v)=>s+v,0)/scores.length).toFixed(1);
+  if (band <= 'middle') {
+    return pick([
+      `ציוני מבחן: ${scores.join(', ')}. חשב ממוצע, חציון ושכיח`,
+      `${scores.length} תלמידים קיבלו ממוצע ${avg}. נוסף תלמיד שקיבל ${rnd(70,100)}. מה הממוצע החדש?`
+    ]);
+  }
+  return pick([
+    `ציוני מחלקה: ${scores.join(', ')}. חשב ממוצע, סטיית תקן. איזה ציון נמצא מחוץ לטווח μ±σ?`,
+    `דגימת ${rnd(5,10)} מדידות: ${scores.join(', ')}. הצג תיבת-שפם (box plot). פרש את המיפוי הסטטיסטי`
+  ]);
+}
+
+function generalVerbal(diff, band) {
+  if (band <= 'elem_mid') {
+    return pick([
+      `לנועה ${rnd(5,20)} קלמרים ולדן ${rnd(3,15)}. כמה יחד? כמה יותר לנועה?`,
+      `ילד קנה ${rnd(2,5)} בלונים ב-${rnd(3,8)} ₪ כל אחד. שילם ${rnd(20,50)} ₪. כמה קיבל עודף?`
+    ]);
+  }
+  if (band === 'elem_high') {
+    return pick([
+      `אורך מסלול ${rnd(2,8)} ק"מ. רץ ${rnd(3,7)} פעמים ביום. כמה ק"מ ריץ בשבוע?`,
+      `ארגז תפוחים: ${rnd(80,200)} יח'. ${rnd(10,40)}% מקולקלים. כמה תפוחים טובים?`
+    ]);
+  }
+  if (band === 'middle') {
+    return pick([
+      `רכבת ${rnd(80,150)} קמ"ש. מרחק ${rnd(200,500)} ק"מ. כמה זמן? אם תוספת תחנות מאריכה ${rnd(10,40)} דק' — מה הזמן הכולל?`,
+      `שני ברזים: א' ממלא ב-${rnd(3,8)} ש', ב' מרוקן ב-${rnd(4,10)} ש'. תוך כמה שעות יתמלא הבריכה אם שניהם פועלים?`
+    ]);
+  }
+  return pick([
+    `השקעה ב-${rnd(3,8)}% ריבית דריבית. אחרי ${rnd(5,10)} שנים שווה ${rnd(10000,50000)} ₪. מה ההשקעה המקורית?`,
+    `שתי קבוצות: ממוצע א' = ${rnd(70,85)}, n=${rnd(15,25)};  ממוצע ב' = ${rnd(75,90)}, n=${rnd(10,20)}. חשב ממוצע משוקלל`
+  ]);
+}
+
+/* ============================================================
+   MATH SUBJECT VALIDATION
+   ============================================================ */
+const MATH_KEYWORDS = [
+  // חשבון בסיסי
+  'חשבון','מתמטיקה','מספר','ספרות','חיבור','חיסור','כפל','חילוק',
+  // שברים ועשרוניים
+  'שבר','שברים','עשרוני','עשרוניים','אחוז','אחוזים',
+  // מספרים מיוחדים
+  'מספרים מכוונים','מכוונים','שלמים','חיובי','שלילי','ראשוני','ראשוניים',
+  'מחלקים','כפולות','מ.מ.כ','מ.מ.ש',
+  // אלגברה
+  'אלגברה','משוואה','משוואות','נעלם','ביטוי','ביטויים','פונקצי','אי-שוויון','אי שוויון',
+  // גיאומטריה
+  'גיאומטריה','גיאומטר','צורות','זווית','זוויות','משולש','ריבוע','מלבן','מעוין','טרפז',
+  'מחומש','משושה','עיגול','מעגל','כדור','קובייה','גליל','חרוט','פירמידה',
+  'שטח','היקף','נפח','אלכסון','רדיוס','קוטר','מיתר','משיק',
+  'פיתגורס','דמיון','חפיפה','סימטריה',
+  // טריגונומטריה
+  'טריגונומטריה','טריגו','סינוס','קוסינוס','טנגנס','sin','cos','tan',
+  // סטטיסטיקה
+  'סטטיסטיקה','ממוצע','חציון','שכיח','סטיית תקן','שונות','נתונים','תדירות','הסתברות',
+  // סדרות ופונקציות
+  'סדרה','סדרות','חשבונית','גיאומטרית','פרבולה','היפרבולה','גבול','נגזרת','אינטגרל',
+  'לוגריתם','אקספוננט','חזקה','שורש',
+  // ריבועיות וכד'
+  'ריבועית','פולינום','גורמים','פירוק','דיסקרימיננט',
+  // מדידות
+  'מדידה','יחידות','מטר','ס"מ','קילו','ליטר','גרם',
+  // כספי / אחוזים שימושיים
+  'ריבית','מחיר','עלות','הנחה','רווח','הפסד',
+  // וקטורים/מטריצות
+  'וקטור','מטריצה','מטריצות',
+  // מונחים נוספים
+  'חישוב','ערך','מספרי','ספירה','קירוב','עיגול מספר'
+];
+
+function isMathSubject(subject) {
+  const s = subject.toLowerCase();
+  return MATH_KEYWORDS.some(kw => s.includes(kw.toLowerCase()));
+}
+
+function showSubjectError(msg) {
+  const el = document.getElementById('subject');
+  el.style.borderColor = '#dc2626';
+  el.focus();
+  let errEl = document.getElementById('subject-error');
+  if (!errEl) {
+    errEl = document.createElement('div');
+    errEl.id = 'subject-error';
+    errEl.style.cssText = 'color:#dc2626;font-size:0.78rem;margin-top:5px;font-weight:600;';
+    el.parentNode.appendChild(errEl);
+  }
+  errEl.textContent = msg;
+  setTimeout(() => {
+    el.style.borderColor = '';
+    if (errEl) errEl.textContent = '';
+  }, 4000);
+}
+
+/* ============================================================
+   MAIN GENERATE / BUILD
+   ============================================================ */
+function generateWorksheet() {
+  const subject = document.getElementById('subject').value.trim();
+  const grade   = document.getElementById('grade').value;
+  const diff    = document.querySelector('input[name="difficulty"]:checked').value;
+  const ctype   = document.querySelector('input[name="content-type"]:checked').value;
+
+  if (!subject) {
+    showSubjectError('חובה להכניס נושא מתמטי');
+    return;
+  }
+  if (!isMathSubject(subject)) {
+    showSubjectError('הנושא אינו מתמטי — הכנס נושא כגון: כפל, גיאומטריה, שברים, אלגברה...');
+    return;
+  }
+  if (!grade) {
+    const el = document.getElementById('grade');
+    el.style.borderColor = '#dc2626'; el.focus();
+    setTimeout(() => el.style.borderColor = '', 2000);
+    return;
+  }
+
+  document.getElementById('loading').classList.add('active');
+  document.getElementById('btn-generate').disabled = true;
+
+  setTimeout(() => {
+    try {
+      const html = buildWorksheetHTML(subject, grade, diff, ctype);
+      document.getElementById('worksheet-output').innerHTML = html;
+      document.getElementById('empty-state').style.display    = 'none';
+      document.getElementById('preview-wrapper').style.display = 'block';
+      document.getElementById('preview-wrapper').scrollIntoView({ behavior:'smooth', block:'start' });
+    } finally {
+      document.getElementById('loading').classList.remove('active');
+      document.getElementById('btn-generate').disabled = false;
+    }
+  }, 600);
+}
+
+function buildWorksheetHTML(subject, grade, diff, ctype) {
+  const today    = new Date().toLocaleDateString('he-IL');
+  const gradeNum = gradeToNum(grade);
+
+  function getDiffList(total, d) {
+    if (d === 'mixed') {
+      const list = [];
+      for (let i=0;i<6; i++) list.push('easy');
+      for (let i=0;i<10;i++) list.push('medium');
+      for (let i=0;i<4; i++) list.push('hard');
+      return list.slice(0, total);
+    }
+    return Array(total).fill(d);
+  }
+
+  let exercisePlan = [];
+
+  if (ctype === 'exercises') {
+    getDiffList(20, diff).forEach((d, i) => {
+      exercisePlan.push({ text: makeExercise(subject, d, gradeNum, i), difficulty: d, type: 'exercise' });
+    });
+  } else if (ctype === 'verbal') {
+    for (let i=0;i<10;i++) {
+      const d = diff==='mixed'?(i<3?'easy':i<8?'medium':'hard'):diff;
+      exercisePlan.push({ text: makeVerbalQuestion(subject, d, gradeNum, i), difficulty: d, type: 'verbal' });
+    }
+  } else {
+    getDiffList(12, diff).forEach((d, i) => {
+      exercisePlan.push({ text: makeExercise(subject, d, gradeNum, i), difficulty: d, type: 'exercise' });
+    });
+    for (let i=0;i<8;i++) {
+      const d = diff==='mixed'?(i<2?'easy':i<6?'medium':'hard'):diff;
+      exercisePlan.push({ text: makeVerbalQuestion(subject, d, gradeNum, i), difficulty: d, type: 'verbal' });
+    }
+  }
+
+  const exercises = exercisePlan.filter(e => e.type === 'exercise');
+  const verbals   = exercisePlan.filter(e => e.type === 'verbal');
+
+  const badgeClass = { easy:'badge-easy', medium:'badge-medium', hard:'badge-hard', mixed:'badge-mixed' };
+  const diffBadge  = `<span class="difficulty-badge ${badgeClass[diff]}">${difficultyLabels[diff]}</span>`;
+  const countLabel = ctype==='exercises'?`${exercises.length} תרגילים`:ctype==='verbal'?`${verbals.length} שאלות מילוליות`:`${exercises.length} תרגילים + ${verbals.length} שאלות מילוליות`;
+
+  function wrapMath(text) {
+    // Split text into Hebrew segments and non-Hebrew (math) segments.
+    // Non-Hebrew segments get wrapped in a LTR <span class="math"> so that
+    // minus signs and operators always appear in the correct left-to-right order,
+    // while Hebrew words remain naturally RTL.
+    const HEB = /[\u0590-\u05FF\uFB1D-\uFB4E\u05F3\u05F4]/;
+    return text.replace(/[^\u0590-\u05FF\uFB1D-\uFB4E\u05F3\u05F4]+/g, match => {
+      const trimmed = match.trim();
+      if (!trimmed) return match; // pure whitespace — keep as-is
+      const lead  = match.match(/^\s*/)[0];
+      const trail = match.match(/\s*$/)[0];
+      return `${lead}<span class="math">${trimmed}</span>${trail}`;
+    });
+  }
+
+  function renderItem(item, num) {
+    const cls = item.type === 'verbal' ? 'verbal' : item.difficulty;
+    const answerHTML = item.type === 'verbal'
+      ? `<div class="ex-answer-lines">${'<div class="line"></div>'.repeat(3)}</div>`
+      : `<div class="ex-answer-line"></div>`;
+    return `
+      <li class="exercise-item">
+        <div class="ex-num ${cls}">${num}</div>
+        <div class="ex-content">
+          <div class="ex-text">${wrapMath(item.text)}</div>
+          ${answerHTML}
+        </div>
+      </li>`;
+  }
+
+  const exSection = exercises.length === 0 ? '' : `
+    <div class="ws-section">
+      <div class="ws-section-title">✏️ חלק א׳ — תרגילים ${diffBadge}</div>
+      <ul class="exercise-list">${exercises.map((e,i)=>renderItem(e,i+1)).join('')}</ul>
+    </div>`;
+
+  const vSection = verbals.length === 0 ? '' : `
+    <div class="ws-section">
+      <div class="ws-section-title">💬 ${exercises.length>0?'חלק ב׳ — ':''}שאלות מילוליות ${diffBadge}</div>
+      <ul class="exercise-list">${verbals.map((v,i)=>renderItem(v,exercises.length+i+1)).join('')}</ul>
+    </div>`;
+
+  return `
+    <div class="ws-header">
+      <div>
+        <div class="ws-title">דף עבודה — ${subject}</div>
+        <div class="ws-meta">
+          <span>📚 כיתה ${grade}</span>
+          <span>📅 ${today}</span>
+          <span>📝 ${countLabel}</span>
+        </div>
+      </div>
+      <div class="ws-logo">📄</div>
+    </div>
+    <div class="ws-student-info">
+      <div class="info-line">שם: ___________________________</div>
+      <div class="info-line">מספר: _________</div>
+      <div class="info-line">תאריך: ___________________</div>
+    </div>
+    ${exSection}${vSection}
+    <div class="ws-footer">
+      <div>📌 ${subject} | כיתה ${grade} | ${difficultyLabels[diff]}</div>
+      <div class="ws-grade-box">ציון<br/>______</div>
+    </div>`;
+}
+
+function resetForm() {
+  document.getElementById('empty-state').style.display = 'flex';
+  document.getElementById('preview-wrapper').style.display = 'none';
+  document.getElementById('worksheet-output').innerHTML = '';
+  document.getElementById('subject').value = '';
+}
+</script>
+</body>
+</html>
