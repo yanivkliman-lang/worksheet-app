@@ -783,13 +783,13 @@ function geoExercise(diff, band) {
     const ang3 = 180 - ang1 - ang2;
     const ext = 180 - ang1;
     const easy = [
-      `במשולש ישר-זווית: רגל א' = ${a}, רגל ב' = ${b}. חשב את היפותנוזה`,
-      `סכום הזוויות במשולש הוא 180°. זווית א' = ${ang1}°, זווית ב' = ${ang2}°. מה זווית ג'?`,
+      `במשולש ישר-זווית: צלע A = ${a}, צלע B = ${b}. חשב את הצלע מול הזווית הישרה`,
+      `סכום הזוויות במשולש הוא 180°. זווית A = ${ang1}°, זווית B = ${ang2}°. מה זווית C?`,
       `ישר עובר בין שתי ישרות מקבילות ויוצר זווית של ${ang1}°. מה הזווית המתחלפת?`,
       `במשולש שווה-שוקיים: זווית הראש = ${rnd(20,100)}°. מה כל אחת מזוויות הבסיס?`
     ];
     const medium = [
-      `משולש ישר-זווית: רגל = ${a}, היפותנוזה = ${c}. חשב את הרגל השנייה`,
+      `משולש ישר-זווית: צלע A = ${a}, הצלע מול הזווית הישרה = ${c}. חשב את הצלע השנייה`,
       `שני ישרים מקבילים, חותכן יוצר זווית ${ang1}°. מצא את כל 8 הזוויות הנוצרות`,
       `במשולש: הזווית החיצונית = ${ext}°. שתי הזוויות הלא-סמוכות = ${ang2}° ו-___. מצא`,
       `ריבוע בתוך עיגול: אורך האלכסון = ${rnd(6,12)}√2 ס"מ. מצא היקף הריבוע`
@@ -1932,10 +1932,18 @@ function tryComputeAnswer(text) {
   if(m) return `${(+m[1] + +m[2]) / 2 * +m[3]} ס"מ²`;
 
   // --- Triangle angles: two given, find third ---
-  m = text.match(/זווית\s+א['']\s*=\s*(\d+)°.*?זווית\s+ב['']\s*=\s*(\d+)°/s);
-  if(m) return `זווית ג' = ${180 - +m[1] - +m[2]}°`;
+  m = text.match(/זווית\s+[AB]\s*=\s*(\d+)°.*?זווית\s+[AB]\s*=\s*(\d+)°/s);
+  if(m) return `זווית C = ${180 - +m[1] - +m[2]}°`;
 
-  // --- Pythagorean theorem ---
+  // --- Pythagorean: find hypotenuse  צלע A = X, צלע B = Y ---
+  m = text.match(/צלע\s+A\s*=\s*(\d+).*?צלע\s+B\s*=\s*(\d+).*?הצלע מול הזווית הישרה/s);
+  if(m){ const h=Math.sqrt(Math.pow(+m[1],2)+Math.pow(+m[2],2)); return Number.isInteger(h)?String(h):String(+h.toFixed(2)); }
+
+  // --- Pythagorean: find missing leg  צלע A = X, הצלע מול הזווית הישרה = Z ---
+  m = text.match(/צלע\s+A\s*=\s*(\d+).*?הצלע מול הזווית הישרה\s*=\s*(\d+)/s);
+  if(m){ const leg=Math.sqrt(Math.pow(+m[2],2)-Math.pow(+m[1],2)); return Number.isInteger(leg)?String(leg):String(+leg.toFixed(2)); }
+
+  // --- Pythagorean theorem (inline formula) ---
   m = text.match(/(\d+)²\s*\+\s*(\d+)²/);
   if(m){ const c=Math.sqrt(Math.pow(+m[1],2)+Math.pow(+m[2],2)); return `${Number.isInteger(c)?c:+c.toFixed(2)}`; }
 
