@@ -783,13 +783,13 @@ function geoExercise(diff, band) {
     const ang3 = 180 - ang1 - ang2;
     const ext = 180 - ang1;
     const easy = [
-      `במשולש ישר-זווית: צלע A = ${a}, צלע B = ${b}. חשב את הצלע מול הזווית הישרה`,
+      `במשולש ישר-זווית: צלע A = ${a}, צלע B = ${b}. חשב את היתר`,
       `סכום הזוויות במשולש הוא 180°. זווית A = ${ang1}°, זווית B = ${ang2}°. מה זווית C?`,
       `ישר עובר בין שתי ישרות מקבילות ויוצר זווית של ${ang1}°. מה הזווית המתחלפת?`,
       `במשולש שווה-שוקיים: זווית הראש = ${rnd(20,100)}°. מה כל אחת מזוויות הבסיס?`
     ];
     const medium = [
-      `משולש ישר-זווית: צלע A = ${a}, הצלע מול הזווית הישרה = ${c}. חשב את הצלע השנייה`,
+      `משולש ישר-זווית: צלע A = ${a}, היתר = ${c}. חשב את הצלע השנייה`,
       `שני ישרים מקבילים, חותכן יוצר זווית ${ang1}°. מצא את כל 8 הזוויות הנוצרות`,
       `במשולש: הזווית החיצונית = ${ext}°. שתי הזוויות הלא-סמוכות = ${ang2}° ו-___. מצא`,
       `ריבוע בתוך עיגול: אורך האלכסון = ${rnd(6,12)}√2 ס"מ. מצא היקף הריבוע`
@@ -1936,11 +1936,11 @@ function tryComputeAnswer(text) {
   if(m) return `זווית C = ${180 - +m[1] - +m[2]}°`;
 
   // --- Pythagorean: find hypotenuse  צלע A = X, צלע B = Y ---
-  m = text.match(/צלע\s+A\s*=\s*(\d+).*?צלע\s+B\s*=\s*(\d+).*?הצלע מול הזווית הישרה/s);
+  m = text.match(/צלע\s+A\s*=\s*(\d+).*?צלע\s+B\s*=\s*(\d+).*?יתר/s);
   if(m){ const h=Math.sqrt(Math.pow(+m[1],2)+Math.pow(+m[2],2)); return Number.isInteger(h)?String(h):String(+h.toFixed(2)); }
 
-  // --- Pythagorean: find missing leg  צלע A = X, הצלע מול הזווית הישרה = Z ---
-  m = text.match(/צלע\s+A\s*=\s*(\d+).*?הצלע מול הזווית הישרה\s*=\s*(\d+)/s);
+  // --- Pythagorean: find missing leg  צלע A = X, היתר = Z ---
+  m = text.match(/צלע\s+A\s*=\s*(\d+).*?היתר\s*=\s*(\d+)/s);
   if(m){ const leg=Math.sqrt(Math.pow(+m[2],2)-Math.pow(+m[1],2)); return Number.isInteger(leg)?String(leg):String(+leg.toFixed(2)); }
 
   // --- Pythagorean theorem (inline formula) ---
