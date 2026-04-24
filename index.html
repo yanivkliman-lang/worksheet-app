@@ -1820,9 +1820,55 @@ function tryComputeAnswer(text) {
   m = text.match(/x\s*\/\s*(\d+)\s*=\s*(-?\d+)/i);
   if(m) return `x = ${+m[1] * +m[2]}`;
 
-  // --- A(x ± B) = C ---
-  m = text.match(/(\d+)\s*\(\s*x\s*([+\-−])\s*(\d+)\s*\)\s*=\s*(\d+)/);
-  if(m){ const a=+m[1],op=m[2],b=+m[3],c=+m[4]; const x=(c/a)+(op==='+' || op==='+' ?-b:b); return `x = ${fmt(x)}`; }
+  // --- A(x ± B) = C  (single number RHS) ---
+  m = text.match(/^(\d+)\s*\(\s*x\s*([+\-−])\s*(\d+)\s*\)\s*=\s*(\d+)\s*$/);
+  if(m){ const a=+m[1],b=(m[2]==='+'?1:-1)*+m[3],c=+m[4]; if(a!==0) return `x = ${fmt((c-a*b)/a)}`; }
+
+  // --- A(x ± B) = C(x ± D)  /  A(x ± B) = (x ± D)C  (coeff before or after) ---
+  // Normalise: extract (coeff, signedOffset) from each side
+  function parseSide(s) {
+    s = s.trim();
+    let mm;
+    mm = s.match(/^(\d+)\s*\(\s*x\s*([+\-−])\s*(\d+)\s*\)$/);
+    if(mm) return {a:+mm[1], k:(mm[2]==='+'?1:-1)*+mm[3]};
+    mm = s.match(/^\(\s*x\s*([+\-−])\s*(\d+)\s*\)\s*(\d+)$/);
+    if(mm) return {a:+mm[3], k:(mm[1]==='+'?1:-1)*+mm[2]};
+    return null;
+  }
+  m = text.match(/^(.+?)\s*=\s*(.+)$/);
+  if(m) {
+    const L=parseSide(m[1]), R=parseSide(m[2]);
+    if(L && R) {
+      // L.a*(x+L.k) = R.a*(x+R.k)  →  (L.a-R.a)x = R.a*R.k - L.a*L.k
+      const coeff=L.a-R.a;
+      if(coeff!==0) return `x = ${fmt((R.a*R.k - L.a*L.k)/coeff)}`;
+    }
+  }
+
+  // --- A(B − x) = C(x ± D)  (b minus x) ---
+  m = text.match(/^(\d+)\s*\(\s*(\d+)\s*[−\-]\s*x\s*\)\s*=\s*(\d+)\s*\(\s*x\s*([+\-−])\s*(\d+)\s*\)\s*$/);
+  if(m){ const a=+m[1],b=+m[2],c=+m[3],d=(m[4]==='+'?1:-1)*+m[5];
+    // a*(b-x)=c*(x+d)  →  ab-ax=cx+cd  →  -(a+c)x=cd-ab
+    const coeff=-(a+c); return `x = ${fmt((c*d-a*b)/coeff)}`; }
+
+  // --- A(x ± B) − C(x ± D) = E  (subtracted paren groups) ---
+  m = text.match(/^(\d+)\s*\(\s*x\s*([+\-−])\s*(\d+)\s*\)\s*[−\-]\s*(\d+)\s*\(\s*x\s*([+\-−])\s*(\d+)\s*\)\s*=\s*(-?\d+)\s*$/);
+  if(m){ const a=+m[1],b=(m[2]==='+'?1:-1)*+m[3],c=+m[4],d=(m[5]==='+'?1:-1)*+m[6],e=+m[7];
+    // (a-c)x + (a*b-c*d) = e
+    const coeff=a-c; if(coeff!==0) return `x = ${fmt((e-a*b+c*d)/coeff)}`; }
+
+  // --- Ax − B(x − C) = D  (mixed, coeff times second paren) ---
+  m = text.match(/^(\d+)\s*x\s*[−\-]\s*(\d+)\s*\(\s*x\s*[−\-]\s*(\d+)\s*\)\s*=\s*(-?\d+)\s*$/);
+  if(m){ const a=+m[1],b=+m[2],c=+m[3],d=+m[4];
+    // ax - b(x-c) = d  →  (a-b)x + bc = d
+    const coeff=a-b; if(coeff!==0) return `x = ${fmt((d-b*c)/coeff)}`; }
+
+  // --- Ax + B = Cx + D  (x on both sides, no parens) ---
+  m = text.match(/^(-?\d*\.?\d+)\s*x\s*([+\-−]\s*\d+\.?\d*)\s*=\s*(-?\d*\.?\d+)\s*x\s*([+\-−]\s*\d+\.?\d*)\s*$/i);
+  if(m && !text.includes('²')) {
+    const a=num(m[1]), b=num(m[2].replace('−','-').replace(/\s/g,'')),
+          c=num(m[3]), d=num(m[4].replace('−','-').replace(/\s/g,''));
+    const coeff=a-c; if(coeff!==0) return `x = ${fmt((d-b)/coeff)}`; }
 
   // --- Quadratic (x±a)(x±b)=0 ---
   m = text.match(/\(x\s*([+\-−])\s*(\d+)\)\s*\(x\s*([+\-−])\s*(\d+)\)\s*=\s*0/);
