@@ -348,12 +348,12 @@
       font-size: 0.9rem;
       color: #1a202c;
       direction: rtl;
-      text-align: left;
+      text-align: right;
     }
-    .ex-text .math {
+    .math {
       direction: ltr;
-      display: inline-block;
-      unicode-bidi: bidi-override;
+      unicode-bidi: isolate;
+      white-space: nowrap;
     }
     .ex-answer-line {
       margin-top: 6px;
@@ -622,19 +622,88 @@ const GRADE_HINTS = {
   'ה׳': ['שברים: חיבור, חיסור, כפל', 'מספרים עשרוניים', 'אחוזים בסיסיים', 'נפח של תיבה', 'שטח משולש', 'סטטיסטיקה בסיסית (ממוצע)'],
   'ו׳': ['אחוזים: חישובים מורכבים', 'יחסים ופרופורציות', 'מספרים שליליים — מבוא', 'שטח עיגול והיקפו', 'מבוא לאלגברה (ביטויים)', 'הסתברות בסיסית'],
   'ז׳': ['מספרים מכוונים (שלמים)', 'משוואות לינאריות עם נעלם אחד', 'ביטויים אלגבריים', 'גיאומטריה: זוויות ומשולשים', 'סטטיסטיקה: ממוצע, חציון, שכיח', 'הסתברות'],
-  'ח׳': ['מערכת משוואות (2 נעלמים)', 'אי-שוויונות', 'פיתגורס', 'גיאומטריה אנליטית — מבוא', 'חזקות ושורשים', 'שברים אלגבריים'],
+  // כיתה ח' — תכנית לימודים מלאה, מאורגנת לפי קטגוריות
+  'ח׳': {
+    'אלגברה': [
+      'תכונות כלליות של פונקציה', 'תחומי עליה וירידה של פונקציה', 'תחומי חיוביות ושליליות של פונקציות',
+      'הפונקציה הקווית', 'שיפוע', 'קצב אחיד ולא אחיד – השתנות של פונקציה',
+      'חישוב קצב השתנות של פונקציה – שיפוע', 'הקשר בין עליה וירידה של פונקציה לבין השיפוע',
+      'חישוב שיפוע בעזרת מדרגות', 'חישוב שיפוע לפי שתי נקודות', 'ייצוגים שונים של פונקציה קווית',
+      'שרטוט גרף של פונקציה קווית', 'מציאת משוואת ישר', 'מציאת משוואת ישר על פי גרף נתון',
+      'מציאת משוואת ישר על פי נקודה ושיפוע', 'מציאת משוואת ישר על פי שתי נקודות',
+      'תחומי חיוביות ושליליות של פונקציה קווית', 'שיטות לסימון פונקציה', 'ייצוג תופעות באמצעות גרפים',
+      'מציאת נקודות חיתוך בין שני ישרים', 'פתרון אי-שוויונות באמצעות גרפים', 'חישוב שטחים הנוצרים בין גרפים',
+      'סיכום – אי-שוויונות ושטחים באמצעות גרף', 'פישוט ביטויים ופתרון משוואות עם מכנה',
+      'חזרה על כינוס איברים ומשוואות קוויות', 'כינוס איברים דומים (פישוט תבניות)',
+      'פתרון משוואות פשוטות', 'פתרון משוואות מתקדמות', 'מתי מפשטים', 'משוואות מהצורה a·b·c=0',
+      'כפל, חילוק וצמצום ביטויים', 'פישוט ביטויים ופתרון משוואות עם מכנה מספרי', 'תחום הצבה',
+      'מציאת מכנה משותף של ביטויים אלגבריים', 'משוואות עם ביטוי אלגברי במכנה', 'מספר פתרונות של משוואות',
+      'השפעת תחום ההצבה על מספר הפתרונות', 'אי-שוויונות', 'מערכת של שתי משוואות בשני נעלמים',
+      'פתרון של משוואה אחת עם שני נעלמים', 'חיבור משוואות והכפלה בקבוע',
+      'מספר פתרונות אפשרי לשתי משוואות בשני נעלמים', 'פתרון גרפי', 'מבוא לשיטת ההצבה', 'שיטת ההצבה',
+      'פתרונות אפשריים בשיטת ההצבה', 'מבוא לשיטת השוואת המקדמים', 'שיטת השוואת מקדמים',
+      'פתרונות אפשריים בשיטת השוואת המקדמים', 'חוק הפילוג המורחב עבור שני גורמים',
+      'חוק הפילוג המורחב עבור שלושה גורמים', 'מציאת גורם משותף', 'הוצאת גורם משותף',
+      'הוצאת סוגריים לפני מינוס', 'פתרון משוואות ריבועיות מהצורה ax² + bx = 0',
+      'צמצום שברים אלגבריים על ידי הוצאת גורם משותף', 'בעיות מילוליות מסוגים שונים',
+      'שיטת "תן למסכן"', 'שיטת ערך משולש', 'בעיות גיל', 'בעיות העברה', 'בעיות כמויות ומחירים (כי"ס)',
+      'בעיות רווח והפסד', 'בעיות מספרים', 'בעיות גאומטריות', 'בעיות תנועה – מבוא',
+      'שימוש בטבלה בבעיות תנועה', 'יחידות מידה בבעיות תנועה', 'דוגמה לפתרון בעיות תנועה', 'בעיות בשני נעלמים'
+    ],
+    'יחס ומספר': [
+      'מציאת יחס', 'דרכים שונות לתיאור יחס', 'חלוקה ביחס נתון (משמעות היחס)',
+      'ביטוי היחס באמצעות משתנה', 'פתרון בעיות יחס', 'פרופורציה', 'יחס ישר',
+      'פונקציה וגרף המתארים יחס ישר', 'יחס הפוך', 'פונקציה וגרף המתארים יחס הפוך', 'קנה מידה'
+    ],
+    'סטטיסטיקה': [
+      'שכיחות, שכיחות יחסית, שכיח וטווח נתונים', 'דרכים שונות להצגת נתונים',
+      'ממוצע', 'תכונות הממוצע', 'חציון'
+    ],
+    'אחוזים': [
+      'מבוא לאחוזים', 'חישוב אחוזים בעל פה', 'רישום אחוזים בעזרת שברים עשרוניים',
+      'חישוב אחוז מתוך כמות נתונה', 'הנחה והתייקרות באחוזים', 'אחוזים בשיטת ערך משולש'
+    ],
+    'גיאומטריה': [
+      'זוויות צמודות', 'זוויות קודקודיות', 'חוצה זווית', 'סוגי הזוויות הנוצרות בין שני ישרים וחותך',
+      'זוויות בין שני ישרים מקבילים וחותך', 'סכום זוויות במשולש', 'זווית חיצונית במשולש',
+      'שרטוט גובה במשולש (שיטת הילד והכדור)', 'שרטוט גובה במשולש באמצעות סרגל', 'שרטוט תיכון במשולש',
+      'חלוקת שטחים במשולש על ידי תיכון', 'גובה, תיכון וחוצה זווית במשולש', 'שטח מלבן',
+      'מציאת שטח משולש', 'שטחים של מצולעים מוכרים – סיכום', 'משפטי חפיפה', 'משפט חפיפה צ.ז.צ',
+      'משפט חפיפה ז.צ.ז', 'משפט חפיפה צ.צ.צ', 'סיכום שלושת משפטי החפיפה', 'טענה וטענה הפוכה',
+      'הוכחה באמצעות טענה ונימוק', 'כלל המעבר', 'נימוקים שכיחים לטבלת טענה-נימוק', 'דמיון משולשים',
+      'שטחים של משולשים דומים', 'הוכחת דמיון משולשים לפי זווית-זווית', 'דמיון מצולעים',
+      'משולש שווה-שוקיים – היכרות', 'תכונות משולש שווה-שוקיים', 'משפטי זיהוי – משולש שווה-שוקיים',
+      'משולש ישר-זווית – היכרות', 'התיכון ליתר במשולש ישר-זווית', 'משפט הפוך – התיכון ליתר',
+      'משמעות גיאומטרית – משפט פיתגורס', 'משמעות אלגברית – משפט פיתגורס', 'הוכחת משפט פיתגורס'
+    ]
+  },
   'ט׳': ['פונקציה לינארית', 'פונקציה ריבועית (פרבולה)', 'משוואה ריבועית', 'טריגונומטריה בסיסית (sin, cos, tan)', 'גיאומטריה: עיגול ותכונותיו', 'סדרות חשבוניות'],
 };
 
 function updateGradeHints() {
   const grade = document.getElementById('grade').value;
   const box   = document.getElementById('grade-hints');
-  if (!grade || !GRADE_HINTS[grade]) {
+  const data  = GRADE_HINTS[grade];
+  if (!grade || !data) {
     box.style.display = 'none';
+    box.style.maxHeight = '';
+    box.style.overflowY = '';
     return;
   }
-  const topics = GRADE_HINTS[grade];
-  box.innerHTML = `<strong>נושאים מומלצים לכיתה ${grade}:</strong><ul>${topics.map(t => `<li>${t}</li>`).join('')}</ul>`;
+  if (Array.isArray(data)) {
+    // רשימת נושאים מומלצים (שאר הכיתות)
+    box.style.maxHeight = '';
+    box.style.overflowY = '';
+    box.innerHTML = `<strong>נושאים מומלצים לכיתה ${grade}:</strong><ul>${data.map(t => `<li>${t}</li>`).join('')}</ul>`;
+  } else {
+    // תכנית לימודים מלאה — מאורגנת לפי קטגוריות
+    box.style.maxHeight = '340px';
+    box.style.overflowY = 'auto';
+    const cats = Object.entries(data).map(([cat, topics]) =>
+      `<div style="margin-bottom:10px;"><strong>${cat}</strong><ul>${topics.map(t => `<li>${t}</li>`).join('')}</ul></div>`
+    ).join('');
+    box.innerHTML = `<strong>תכנית לימודים — כיתה ${grade}</strong>${cats}`;
+  }
   box.style.display = 'block';
 }
 
@@ -677,6 +746,19 @@ function getBand(g) {
    ============================================================ */
 function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function pick(arr)      { return arr[rnd(0, arr.length - 1)]; }
+
+// Wrap each LTR math run (one that contains a letter/digit) in an isolated <bdi>
+// so expressions like "y = 3x + 1" read left-to-right inside the RTL Hebrew text.
+// Pure whitespace/punctuation runs are left untouched so they resolve naturally.
+function wrapMath(text) {
+  if (text == null) return '';
+  return String(text).replace(/[^\u0590-\u05FF\uFB1D-\uFB4E\u05F3\u05F4]+/g, function (run) {
+    if (!/[A-Za-z0-9]/.test(run)) return run;
+    const lead  = run.match(/^\s*/)[0];
+    const trail = run.match(/\s*$/)[0];
+    return lead + '<bdi class="math">' + run.trim() + '</bdi>' + trail;
+  });
+}
 
 // Pythagorean triples for clean integer answers
 const PYTH_TRIPLES = [
@@ -2006,12 +2088,12 @@ function buildAnswersHTML(subject, grade, diff, exercisePlan) {
   const items = exercisePlan.map((item, idx) => {
     const num = idx + 1;
     const ans = item.answer !== null && item.answer !== undefined ? item.answer : '—';
-    const ansHTML = `<span class="ans-value">${ans}</span>`;
+    const ansHTML = `<span class="ans-value">${wrapMath(String(ans))}</span>`;
     return `
       <div class="answer-item">
         <span class="ans-num">${num}</span>
         <div class="ans-content">
-          <div class="ans-question">${item.text}</div>
+          <div class="ans-question">${wrapMath(item.text)}</div>
           ${ansHTML}
         </div>
       </div>`;
@@ -2146,20 +2228,7 @@ function buildWorksheetHTML(subject, grade, diff, ctype) {
   const diffBadge  = `<span class="difficulty-badge ${badgeClass[diff]}">${difficultyLabels[diff]}</span>`;
   const countLabel = ctype==='exercises'?`${exercises.length} תרגילים`:ctype==='verbal'?`${verbals.length} שאלות מילוליות`:`${exercises.length} תרגילים + ${verbals.length} שאלות מילוליות`;
 
-  function wrapMath(text) {
-    // Split text into Hebrew segments and non-Hebrew (math) segments.
-    // Non-Hebrew segments get wrapped in a LTR <span class="math"> so that
-    // minus signs and operators always appear in the correct left-to-right order,
-    // while Hebrew words remain naturally RTL.
-    const HEB = /[\u0590-\u05FF\uFB1D-\uFB4E\u05F3\u05F4]/;
-    return text.replace(/[^\u0590-\u05FF\uFB1D-\uFB4E\u05F3\u05F4]+/g, match => {
-      const trimmed = match.trim();
-      if (!trimmed) return match; // pure whitespace — keep as-is
-      const lead  = match.match(/^\s*/)[0];
-      const trail = match.match(/\s*$/)[0];
-      return `${lead}<span class="math">${trimmed}</span>${trail}`;
-    });
-  }
+  // wrapMath is a global helper (see MATH HELPERS section)
 
   function renderItem(item, num) {
     const cls = item.type === 'verbal' ? 'verbal' : item.difficulty;
