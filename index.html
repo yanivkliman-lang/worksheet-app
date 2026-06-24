@@ -752,11 +752,26 @@ function pick(arr)      { return arr[rnd(0, arr.length - 1)]; }
 // Pure whitespace/punctuation runs are left untouched so they resolve naturally.
 function wrapMath(text) {
   if (text == null) return '';
-  return String(text).replace(/[^\u0590-\u05FF\uFB1D-\uFB4E\u05F3\u05F4]+/g, function (run) {
-    if (!/[A-Za-z0-9]/.test(run)) return run;
+  const HEB = /[\u0590-\u05FF\uFB1D-\uFB4E\u05F3\u05F4]/;
+  return String(text).replace(/[^\u0590-\u05FF\uFB1D-\uFB4E\u05F3\u05F4]+/g, function (run, offset, full) {
+    if (!/[A-Za-z0-9]/.test(run)) return run;          // whitespace/punctuation only
     const lead  = run.match(/^\s*/)[0];
     const trail = run.match(/\s*$/)[0];
-    return lead + '<bdi class="math">' + run.trim() + '</bdi>' + trail;
+    let core = run.slice(lead.length, run.length - trail.length);
+    // A connector hyphen attaching a Latin token to a preceding Hebrew word
+    // (e.g. chituch-x) stays RTL, outside the isolated run.
+    let connector = '';
+    const prev = full[offset - 1];
+    if (lead === '' && prev && HEB.test(prev)) {
+      const mh = core.match(/^-+/);
+      if (mh && /[A-Za-z0-9]/.test(core.slice(mh[0].length))) { connector = mh[0]; core = core.slice(mh[0].length); }
+    }
+    // Sentence punctuation (?:;.,!) at the edges belongs to the Hebrew text,
+    // not the math island, so keep it outside the isolated span.
+    const leadP  = core.match(/^[?:;.,!\s]*/)[0];  core = core.slice(leadP.length);
+    const trailP = core.match(/[?:;.,!\s]*$/)[0];  core = core.slice(0, core.length - trailP.length);
+    if (!core) return run;
+    return lead + connector + leadP + '<span class="math" dir="ltr">' + core + '</span>' + trailP + trail;
   });
 }
 
@@ -1423,8 +1438,8 @@ function functionsExercise(diff, band) {
   if (band === 'middle') {
     const x1=rnd(-3,3), y1=rnd(-3,3), x2=rnd(1,6), y2=rnd(1,8);
     const easy = [
-      `ישר y = ${m}x + ${n}: מה השיפוע? מה חתך-y? חשב y עבור x = ${rnd(-3,5)}`,
-      `מצא חתך-x של ישר y = ${m}x + ${n}`,
+      `ישר y = ${m}x + ${n}: מה השיפוע? מה חתך y? חשב y עבור x = ${rnd(-3,5)}`,
+      `מצא חתך x של ישר y = ${m}x + ${n}`,
       `שני ישרים: y = ${m}x + ${n} ו-y = ${-m}x + ${rnd(-4,4)}. האם מקבילים? האם מאונכים?`
     ];
     const medium = [
